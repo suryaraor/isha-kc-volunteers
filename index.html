@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Isha KC Volunteer Outreach</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Isha KC Volunteer Outreach</h1>
+            <div class="count-box">
+                <div class="count-label">Reached out</div>
+                <div class="count-number" id="assignedCount">0</div>
+                <div class="count-label">of <span id="totalCount">0</span></div>
+            </div>
+        </div>
+
+        <div id="loadingIndicator" class="loading"><p>Loading data...</p></div>
+        <div id="errorMessage" class="error-message" style="display: none;"></div>
+        <div id="toast" class="toast" style="display: none;"></div>
+
+        <!-- Step 1: who are you? -->
+        <section id="stepIdentify" style="display: none;">
+            <div class="section-head">
+                <h2>Who are you?</h2>
+                <p>Select your name from the active volunteers.</p>
+            </div>
+            <div class="search-section">
+                <input type="text" id="identifySearch" class="search-input" placeholder="Search your name..." autocomplete="off">
+            </div>
+            <div id="activeList" class="results-list"></div>
+            <div id="noActive" class="no-results" style="display: none;"><p>No matching name.</p></div>
+        </section>
+
+        <!-- Step 2: pick volunteers -->
+        <section id="stepPick" style="display: none;">
+            <div class="me-bar">
+                <div>Hi, <strong id="meName"></strong></div>
+                <button id="notMeBtn" class="link-btn">Not you?</button>
+            </div>
+
+            <div class="section-head">
+                <h2>Your volunteers <span class="pill" id="mineCount">0</span></h2>
+            </div>
+            <div id="mineList" class="results-list"></div>
+            <div id="noMine" class="no-results" style="display: none;"><p>You haven't picked anyone yet.</p></div>
+
+            <div class="section-head">
+                <h2>Available volunteers <span class="pill" id="availCount">0</span></h2>
+                <p>Tap to select any number of people, then confirm.</p>
+            </div>
+            <div class="search-section">
+                <input type="text" id="pickSearch" class="search-input" placeholder="Search available volunteers..." autocomplete="off">
+            </div>
+            <div id="availList" class="results-list"></div>
+            <div id="noAvail" class="no-results" style="display: none;"><p>No available volunteers.</p></div>
+
+            <div class="action-bar">
+                <button id="assignBtn" class="primary-btn" disabled>Assign selected to me</button>
+            </div>
+        </section>
+
+        <!-- First-run setup -->
+        <section id="setupInstructions" class="setup-instructions" style="display: none;">
+            <h2>Connect to Google Sheet</h2>
+            <p>Paste your Apps Script web app URL (see README.md). It is saved in this browser only.</p>
+            <input type="text" id="urlInput" class="search-input" placeholder="https://script.google.com/macros/s/.../exec">
+            <button id="saveUrlBtn" class="primary-btn">Save &amp; load</button>
+        </section>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
