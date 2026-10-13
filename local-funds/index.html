@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Isha KC Local Funds</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Isha KC Local Funds</h1>
+            <div class="count-box">
+                <div class="count-label">Balance</div>
+                <div class="count-number" id="headerBalance">$0</div>
+                <div class="count-label">on hand</div>
+            </div>
+        </div>
+
+        <nav class="tabs">
+            <button class="tab" data-view="donors">Donors</button>
+            <button class="tab" data-view="balance">Balance &amp; spending</button>
+            <button class="tab" data-view="add">Add entry</button>
+        </nav>
+
+        <div id="loadingIndicator" class="loading"><p>Loading data...</p></div>
+        <div id="errorMessage" class="error-message" style="display: none;"></div>
+        <div id="toast" class="toast" style="display: none;"></div>
+
+        <!-- View 1: donors -->
+        <section id="view-donors" class="view" style="display: none;">
+            <div class="stats">
+                <div class="stat"><div class="stat-label">Total donated</div><div class="stat-value" id="donTotal">$0</div></div>
+                <div class="stat"><div class="stat-label">Donors</div><div class="stat-value" id="donCount">0</div></div>
+            </div>
+            <div class="section-head">
+                <h2>Donors</h2>
+                <p>Tap a name to see each contribution.</p>
+            </div>
+            <div id="donorList" class="results-list"></div>
+            <div id="noDonors" class="no-results" style="display: none;"><p>No donations recorded yet.</p></div>
+        </section>
+
+        <!-- View 2: balance, holders, spending, ledger -->
+        <section id="view-balance" class="view" style="display: none;">
+            <div class="stats three">
+                <div class="stat"><div class="stat-label">Received</div><div class="stat-value" id="balIn">$0</div></div>
+                <div class="stat"><div class="stat-label">Spent</div><div class="stat-value" id="balOut">$0</div></div>
+                <div class="stat accent"><div class="stat-label">Balance</div><div class="stat-value" id="balNow">$0</div></div>
+            </div>
+
+            <div class="section-head">
+                <h2>Who holds the money</h2>
+                <p>Donations received, minus spending, plus/minus handovers.</p>
+            </div>
+            <div id="holderList" class="results-list"></div>
+            <div id="noHolders" class="no-results" style="display: none;"><p>Nobody is holding funds.</p></div>
+
+            <div class="section-head">
+                <h2>Initiatives</h2>
+            </div>
+            <div id="initiativeList" class="card-list"></div>
+
+            <div class="section-head">
+                <h2>All entries <span class="pill" id="ledgerCount">0</span></h2>
+            </div>
+            <div class="search-section">
+                <input type="text" id="ledgerSearch" class="search-input" placeholder="Search name, initiative, note..." autocomplete="off">
+            </div>
+            <div id="ledgerList" class="results-list tall"></div>
+            <div id="noLedger" class="no-results" style="display: none;"><p>No entries.</p></div>
+        </section>
+
+        <!-- View 3: add entry (PIN protected) -->
+        <section id="view-add" class="view" style="display: none;">
+            <div id="pinBox" class="form">
+                <div class="section-head flush">
+                    <h2>Enter PIN</h2>
+                    <p>Only fund keepers can add entries. The PIN is remembered on this device.</p>
+                </div>
+                <input type="password" id="pinInput" class="search-input" inputmode="numeric" placeholder="PIN" autocomplete="off">
+                <button id="pinBtn" class="primary-btn">Unlock</button>
+            </div>
+
+            <form id="txForm" class="form" style="display: none;">
+                <div class="segmented" id="typeSeg">
+                    <button type="button" data-type="Donation">Donation</button>
+                    <button type="button" data-type="Expense">Expense</button>
+                    <button type="button" data-type="Handover">Handover</button>
+                </div>
+                <p class="hint" id="typeHint"></p>
+
+                <div class="row">
+                    <label>Date<input type="date" id="fDate" class="search-input" required></label>
+                    <label>Amount ($)<input type="number" id="fAmount" class="search-input" min="0.01" step="0.01" inputmode="decimal" required></label>
+                </div>
+                <label><span id="fFromLabel">Donor</span><input type="text" id="fFrom" class="search-input" list="peopleList" autocomplete="off" required></label>
+                <label id="fToWrap"><span id="fToLabel">Received by</span><input type="text" id="fTo" class="search-input" list="peopleList" autocomplete="off"></label>
+                <div id="fExpenseWrap" class="row">
+                    <label>Initiative<select id="fInitiative" class="search-input"></select></label>
+                    <label>Qty<input type="number" id="fQty" class="search-input" min="0" step="1" inputmode="numeric"></label>
+                </div>
+                <label>Note<input type="text" id="fNote" class="search-input" placeholder="Optional, e.g. Guru Purnima satsang" autocomplete="off"></label>
+                <datalist id="peopleList"></datalist>
+
+                <button type="submit" id="saveBtn" class="primary-btn">Save entry</button>
+                <button type="button" id="lockBtn" class="link-btn">Lock (forget PIN on this device)</button>
+            </form>
+        </section>
+
+        <!-- First-run setup -->
+        <section id="setupInstructions" class="setup-instructions" style="display: none;">
+            <h2>Connect to Google Sheet</h2>
+            <p>Paste your Apps Script web app URL (see README.md). It is saved in this browser only.</p>
+            <input type="text" id="urlInput" class="search-input" placeholder="https://script.google.com/macros/s/.../exec">
+            <button id="saveUrlBtn" class="primary-btn">Save &amp; load</button>
+        </section>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
