@@ -15,7 +15,8 @@ let state = {
     view: 'donors',
     type: 'Donation',
     pin: localStorage.getItem('kcf_pin') || '',
-    openDonor: null
+    openDonor: null,
+    editing: null // transaction being edited in the entry form
 };
 let jsonpCounter = 0;
 
@@ -113,8 +114,13 @@ function init() {
     $('lockBtn').addEventListener('click', () => {
         state.pin = '';
         localStorage.removeItem('kcf_pin');
+        resetForm();
         renderAdd();
         renderLedger();
+    });
+    $('cancelEditBtn').addEventListener('click', () => {
+        resetForm();
+        location.hash = 'balance';
     });
     document.querySelectorAll('#typeSeg button').forEach((b) => b.addEventListener('click', () => setType(b.dataset.type)));
     $('txForm').addEventListener('submit', saveEntry);
@@ -319,9 +325,15 @@ function renderLedger() {
             el('span', 'sub', `${fmtDate(t.date)}${t.note ? ` · ${t.note}` : ''}${t.voided ? ' · voided' : ''}`)
         );
         if (state.pin) {
-            const btn = el('button', 'link-btn' + (t.voided ? '' : ' danger'), t.voided ? 'Restore' : 'Void');
-            btn.addEventListener('click', () => toggleVoid(t, btn));
-            item.appendChild(btn);
+            const actions = el('div', 'actions');
+            const edit = el('button', 'link-btn', 'Edit');
+            edit.addEventListener('click', () => startEdit(t));
+            const vbtn = el('button', 'link-btn', t.voided ? 'Restore' : 'Void');
+            vbtn.addEventListener('click', () => toggleVoid(t, vbtn));
+            const del = el('button', 'link-btn danger', 'Delete');
+            del.addEventListener('click', () => deleteEntry(t, del));
+            actions.append(edit, vbtn, del);
+            item.appendChild(actions);
         }
         list.appendChild(item);
     });
@@ -332,6 +344,11 @@ function renderLedger() {
 function renderAdd(s = summarize()) {
     show('pinBox', !state.pin);
     show('txForm', !!state.pin);
+    const t = state.editing;
+    show('editBanner', !!t);
+    if (t) $('editBanner').textContent = `Editing ${t.type.toLowerCase()} of ${money(t.amount)} from ${fmtDate(t.date)}.`;
+    show('cancelEditBtn', !!t);
+    $('saveBtn').textContent = t ? 'Update entry' : 'Save entry';
     const people = $('peopleList');
     people.replaceChildren(...s.people.map((p) => {
         const o = el('option');
@@ -340,11 +357,10 @@ function renderAdd(s = summarize()) {
     }));
     const sel = $('fInitiative');
     const current = sel.value;
-    sel.replaceChildren(...state.initiatives.map((i) => {
-        const o = el('option', '', i.name);
-        o.value = i.name;
-        return o;
-    }));
+    const names = state.initiatives.map((i) => i.name);
+    // Keep an edited entry's initiative even if it's no longer on the Initiatives tab
+    if (t && t.initiative && !names.includes(t.initiative)) names.push(t.initiative);
+    sel.replaceChildren(...names.map((n) => new Option(n, n)));
     if (current) sel.value = current;
 }
 
@@ -378,9 +394,32 @@ function setType(type) {
     $('fInitiative').required = type === 'Expense';
 }
 
+function startEdit(t) {
+    state.editing = t;
+    setType(t.type);
+    $('fDate').value = t.date;
+    $('fAmount').value = t.amount;
+    $('fFrom').value = t.from;
+    $('fTo').value = t.to;
+    $('fQty').value = t.qty || '';
+    $('fNote').value = t.note;
+    renderAdd();
+    if (t.initiative) $('fInitiative').value = t.initiative;
+    location.hash = 'add';
+    window.scrollTo(0, 0);
+}
+
+function resetForm() {
+    state.editing = null;
+    ['fAmount', 'fFrom', 'fTo', 'fQty', 'fNote'].forEach((id) => { $(id).value = ''; });
+    $('fDate').value = today();
+    renderAdd();
+}
+
 async function saveEntry(e) {
     e.preventDefault();
     const btn = $('saveBtn');
+    const editing = state.editing;
     btn.disabled = true;
     btn.textContent = 'Saving...';
     showError('');
@@ -395,9 +434,15 @@ async function saveEntry(e) {
         note: $('fNote').value.trim()
     };
     try {
-        await api({ action: 'add', pin: state.pin, ...entry });
-        showToast(`${entry.type} of ${money(Number(entry.amount))} saved.`);
-        ['fAmount', 'fFrom', 'fTo', 'fQty', 'fNote'].forEach((id) => { $(id).value = ''; });
+        if (editing) {
+            await api({ action: 'update', pin: state.pin, id: editing.id, ...entry });
+            showToast(`${entry.type} of ${money(Number(entry.amount))} updated.`);
+            location.hash = 'balance';
+        } else {
+            await api({ action: 'add', pin: state.pin, ...entry });
+            showToast(`${entry.type} of ${money(Number(entry.amount))} saved.`);
+        }
+        resetForm();
         await load();
     } catch (err) {
         if (err.message === 'Wrong PIN') {
@@ -408,7 +453,30 @@ async function saveEntry(e) {
         showError(err.message);
     }
     btn.disabled = false;
-    btn.textContent = 'Save entry';
+    renderAdd();
+}
+
+// First tap arms the button, second tap within 4s deletes
+async function deleteEntry(t, btn) {
+    if (!btn.dataset.armed) {
+        btn.dataset.armed = '1';
+        btn.textContent = 'Tap again to delete';
+        setTimeout(() => {
+            delete btn.dataset.armed;
+            btn.textContent = 'Delete';
+        }, 4000);
+        return;
+    }
+    btn.disabled = true;
+    try {
+        await api({ action: 'delete', pin: state.pin, id: t.id });
+        if (state.editing && state.editing.id === t.id) resetForm();
+        showToast('Entry deleted.');
+        await load();
+    } catch (err) {
+        showError(err.message);
+        btn.disabled = false;
+    }
 }
 
 async function toggleVoid(t, btn) {

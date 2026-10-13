@@ -7,12 +7,15 @@ Live at `https://suryaraor.github.io/isha-kc-volunteers/local-funds/`
 **Views**
 - **Donors**: every donor with their total, number of contributions, and last date. Tap a name for the breakdown.
 - **Balance & spending**: total received, spent, balance; who currently holds the money; spending per initiative (with how many units the balance still covers); full history of entries.
-- **Add entry**: PIN protected. Three kinds of entry:
+- **Add entry**: PIN protected; also used to edit an existing entry. Three kinds of entry:
   - *Donation*: donor gave money, and who received it (that person now holds it).
   - *Expense*: a holder spent money on an initiative (optional quantity, e.g. 2 bottles).
   - *Handover*: cash moved from one holder to another.
 
-Anyone with the link can view. Only people with the PIN can add or void entries. Entries are never deleted: "Void" keeps the row in the history but stops it counting, so mistakes are visible and reversible.
+Anyone with the link can view. Only people with the PIN can change data. Once unlocked, every entry under "All entries" has:
+- **Edit**: opens it in the entry form; change any field (including the type) and tap "Update entry".
+- **Void / Restore**: keeps the row in the history but stops it counting, so the change is visible and reversible.
+- **Delete**: tap twice to remove the row from the sheet for good.
 
 ## Setup
 

@@ -163,6 +163,9 @@ body {
 .result-item.voided .amount { text-decoration: line-through; }
 .result-item.static { cursor: default; }
 .result-item.static:hover { background: #f8f9fa; }
+.result-item .actions { width: 100%; display: flex; gap: 16px; }
+.result-item .actions .link-btn { padding: 4px 0; }
+.edit-banner { padding: 10px 14px; border-radius: 10px; background: #fff4dc; color: #8a5a00; font-size: 14px; }
 .details { width: 100%; margin-top: 6px; border-top: 1px solid #e9ecef; padding-top: 6px; }
 .details div { display: flex; justify-content: space-between; font-size: 14px; color: #555; padding: 3px 0; }
 

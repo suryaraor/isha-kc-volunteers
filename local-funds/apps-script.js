@@ -48,6 +48,14 @@ function doGet(e) {
         checkPin(p.pin);
         result = withLock(() => addTx(p));
         break;
+      case 'update':
+        checkPin(p.pin);
+        result = withLock(() => updateTx(p));
+        break;
+      case 'delete':
+        checkPin(p.pin);
+        result = withLock(() => deleteTx(p.id));
+        break;
       case 'void':
         checkPin(p.pin);
         result = withLock(() => voidTx(p.id, true));
@@ -159,7 +167,8 @@ function getData() {
   };
 }
 
-function addTx(p) {
+// Validates an entry and returns its fields, cleared where they don't apply to the type
+function parseTx(p) {
   const type = String(p.type || '').trim();
   if (TYPES.indexOf(type) === -1) throw new Error('Type must be Donation, Expense or Handover');
   const amount = Math.round(Number(p.amount) * 100) / 100;
@@ -173,19 +182,25 @@ function addTx(p) {
   if (type !== 'Expense' && !to) throw new Error('Received by / To is required');
   if (type === 'Expense' && !initiative) throw new Error('Initiative is required for an expense');
   if (type === 'Handover' && from.toLowerCase() === to.toLowerCase()) throw new Error('From and To must differ');
+  return {
+    'Date': date,
+    'Type': type,
+    'Amount': amount,
+    'From': from,
+    'To': type === 'Expense' ? '' : to,
+    'Initiative': type === 'Expense' ? initiative : '',
+    'Qty': type === 'Expense' && Number(p.qty) > 0 ? Number(p.qty) : '',
+    'Note': String(p.note || '').trim()
+  };
+}
 
+function addTx(p) {
+  const fields = parseTx(p);
   const { sheet, c } = readTx();
   const id = Utilities.getUuid().slice(0, 8);
   const row = new Array(TX_HEADERS.length).fill('');
   row[c['ID']] = id;
-  row[c['Date']] = date;
-  row[c['Type']] = type;
-  row[c['Amount']] = amount;
-  row[c['From']] = from;
-  row[c['To']] = type === 'Expense' ? '' : to;
-  row[c['Initiative']] = type === 'Expense' ? initiative : '';
-  row[c['Qty']] = type === 'Expense' && Number(p.qty) > 0 ? Number(p.qty) : '';
-  row[c['Note']] = String(p.note || '').trim();
+  Object.keys(fields).forEach(k => { row[c[k]] = fields[k]; });
   row[c['Entered At']] = new Date();
   row[c['Voided']] = '';
   sheet.appendRow(row);
@@ -193,11 +208,31 @@ function addTx(p) {
   return { success: true, id: id };
 }
 
-// Entries are never deleted, only voided, so the history stays auditable
-function voidTx(id, on) {
-  const { sheet, c, rows } = readTx();
-  const t = rows.find(r => r.id === String(id));
+function findTx(id) {
+  const tx = readTx();
+  const t = tx.rows.find(r => r.id === String(id));
   if (!t) throw new Error('Entry not found');
+  return { ...tx, t };
+}
+
+function updateTx(p) {
+  const fields = parseTx(p);
+  const { sheet, c, t } = findTx(p.id);
+  Object.keys(fields).forEach(k => sheet.getRange(t.row, c[k] + 1).setValue(fields[k]));
+  SpreadsheetApp.flush();
+  return { success: true };
+}
+
+function deleteTx(id) {
+  const { sheet, t } = findTx(id);
+  sheet.deleteRow(t.row);
+  SpreadsheetApp.flush();
+  return { success: true };
+}
+
+// Void keeps the row in the history but stops it counting
+function voidTx(id, on) {
+  const { sheet, c, t } = findTx(id);
   sheet.getRange(t.row, c['Voided'] + 1).setValue(on ? 'yes' : '');
   SpreadsheetApp.flush();
   return { success: true };

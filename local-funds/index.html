@@ -76,13 +76,14 @@
             <div id="pinBox" class="form">
                 <div class="section-head flush">
                     <h2>Enter PIN</h2>
-                    <p>Only fund keepers can add entries. The PIN is remembered on this device.</p>
+                    <p>Only fund keepers can add, edit or delete entries. The PIN is remembered on this device.</p>
                 </div>
                 <input type="password" id="pinInput" class="search-input" inputmode="numeric" placeholder="PIN" autocomplete="off">
                 <button id="pinBtn" class="primary-btn">Unlock</button>
             </div>
 
             <form id="txForm" class="form" style="display: none;">
+                <div id="editBanner" class="edit-banner" style="display: none;"></div>
                 <div class="segmented" id="typeSeg">
                     <button type="button" data-type="Donation">Donation</button>
                     <button type="button" data-type="Expense">Expense</button>
@@ -104,6 +105,7 @@
                 <datalist id="peopleList"></datalist>
 
                 <button type="submit" id="saveBtn" class="primary-btn">Save entry</button>
+                <button type="button" id="cancelEditBtn" class="link-btn" style="display: none;">Cancel editing</button>
                 <button type="button" id="lockBtn" class="link-btn">Lock (forget PIN on this device)</button>
             </form>
         </section>
