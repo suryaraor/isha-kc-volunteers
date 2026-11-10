@@ -160,3 +160,11 @@ body.sheet-open { overflow: hidden; }
 .who-input { padding-left: 44px; background: #faf7f0 url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='24'%20height='24'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='%238a8173'%20stroke-width='2'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Ccircle%20cx='11'%20cy='11'%20r='8'/%3E%3Cpath%20d='m21%2021-4.3-4.3'/%3E%3C/svg%3E") no-repeat 14px center / 20px; }
 .who-input:focus { background-color: #fff; }
 .mat-details { font-size: 11px; line-height: 1.25; color: #8a8173; text-align: center; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+
+/* ---------- Who signed up: names stand out ---------- */
+.mat-who { display: flex; flex-direction: column; align-items: center; gap: 4px; margin-top: 4px; font-size: inherit; color: inherit; line-height: normal; }
+.who-also { font-size: 11px; font-weight: 600; color: #676055; }
+.who-chip { display: inline-flex; align-items: center; gap: 5px; max-width: 100%; background: #fff; color: #28231e; border: 1.5px solid #d4ccbc; border-radius: 999px; padding: 3px 10px 3px 7px; font-size: 13px; font-weight: 700; line-height: 1.2; text-align: left; }
+.who-chip .ic { width: 14px; height: 14px; color: #cf4520; }
+.mchip-note.has-name { font-size: 12px; font-weight: 700; color: #28231e; }
+.mchip.full .mchip-note.has-name { color: #28231e; }

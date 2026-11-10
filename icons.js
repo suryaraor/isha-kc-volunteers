@@ -4,6 +4,7 @@
 // 'folded-sheets', 'flower-vase' and 'small-basket' are not from Lucide: they are drawn in the same style
 // (24px grid, rounded strokes).
 const ICON_SHAPES = {
+    'user': '<path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/> <circle cx="12" cy="7" r="4"/>',
     'clipboard-list': '<rect width="8" height="4" x="8" y="2" rx="1" ry="1"/> <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/> <path d="M12 11h4"/> <path d="M12 16h4"/> <path d="M8 11h.01"/> <path d="M8 16h.01"/>',
     'flower-vase': '<path d="M9.5 10h5"/><path d="M9.5 10c0 2.5-3 3.7-3 7a3 3 0 0 0 3 3h5a3 3 0 0 0 3-3c0-3.3-3-4.5-3-7"/><path d="M12 10V5"/><path d="M10.5 10 8 6.5"/><path d="M13.5 10 16 6.5"/><circle cx="12" cy="3.8" r="1.3"/><circle cx="7.3" cy="5.4" r="1.2"/><circle cx="16.7" cy="5.4" r="1.2"/>',
     'small-basket': '<path d="M7 10a5 5 0 0 1 10 0"/><path d="M3.5 10h17l-1.6 8.3a2 2 0 0 1-2 1.7H7.1a2 2 0 0 1-2-1.7z"/><path d="M9 10l.8 10"/><path d="M15 10l-.8 10"/><path d="M4.3 14.5h15.4"/>',

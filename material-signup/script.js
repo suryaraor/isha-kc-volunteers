@@ -202,7 +202,16 @@ function renderMaterials() {
         tile.appendChild(el('span', 'mat-status', status));
         // Names under the badge, leaving out "You" when the badge already says it
         const others = people.filter((p) => p.id !== mstate.me?.id).map((p) => firstName(p.name));
-        if (others.length) tile.appendChild(el('span', 'mat-who', (mine ? 'Also: ' : '') + others.join(', ')));
+        if (others.length) {
+            const who = el('span', 'mat-who');
+            if (mine) who.appendChild(el('span', 'who-also', 'Also'));
+            others.forEach((n) => {
+                const chip = el('span', 'who-chip');
+                chip.append(icon('user'), el('span', '', n));
+                who.appendChild(chip);
+            });
+            tile.appendChild(who);
+        }
         if (ahead) {
             const more = el('span', 'mat-ahead');
             more.append(icon('repeat'), `+${ahead} more month${ahead === 1 ? '' : 's'}`);
@@ -296,7 +305,7 @@ function renderSheet() {
             : on ? '✓ You'
                 : others.length ? `${others.length}/${m.slots} · ${firstName(others[0].name)}`
                     : u.key === CYCLE.key ? 'This month' : '';
-        b.appendChild(el('span', 'mchip-note', note));
+        b.appendChild(el('span', 'mchip-note' + (full || (!on && others.length) ? ' has-name' : ''), note));
         b.setAttribute('aria-label', `${u.month} ${u.day}: ${full ? `covered by ${others.map((p) => p.name).join(', ')}` : on ? 'selected' : 'not selected'}`);
         b.addEventListener('click', () => {
             if (sheet.picked.has(u.key)) sheet.picked.delete(u.key);
