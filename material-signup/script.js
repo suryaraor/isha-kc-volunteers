@@ -76,11 +76,11 @@ async function init() {
 // (e.g. "flower-2") in that item's Icon cell in the Materials tab. An emoji there still works for
 // items that have no icon here, and the emoji below go into the WhatsApp share text.
 const DEFAULT_ICONS = {
-    whitesheets: 'bed-double', flowers: 'flower-2', oil: 'droplet', bin: 'shopping-basket', picture: 'image',
-    chair: 'armchair', speaker: 'speaker', yellowbox: 'package', carpets: 'rectangle-horizontal'
+    whitesheets: 'folded-sheets', flowers: 'flower-2', oil: 'droplet', bin: 'shopping-basket', picture: 'image',
+    chair: 'armchair', speaker: 'speaker', yellowbox: 'package', carpets: 'rectangle-horizontal', projector: 'projector'
 };
 const SHARE_EMOJI = {
-    whitesheets: '🛏️', flowers: '🌸', oil: '🪔', bin: '🧺', picture: '🖼️', chair: '🪑', speaker: '🔊', yellowbox: '📦', carpets: '🟥'
+    whitesheets: '🛏️', flowers: '🌸', oil: '🪔', bin: '🧺', picture: '🖼️', chair: '🪑', speaker: '🔊', yellowbox: '📦', carpets: '🟥', projector: '📽️'
 };
 
 function applyMaterials(d) {

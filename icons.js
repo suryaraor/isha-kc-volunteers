@@ -1,7 +1,10 @@
 // Lucide icons (https://lucide.dev, ISC licence) used by the outreach and material-signup pages.
 // icon(name, cls) returns an <svg> element; the same symbols can be used in static HTML with
 // <svg class="ic"><use href="#i-NAME"/></svg>. Add more by pasting an icon's inner SVG shapes below.
+// 'folded-sheets' is not from Lucide: it is drawn in the same style (24px grid, rounded strokes).
 const ICON_SHAPES = {
+    'projector': '<path d="M5 7 3 5"/> <path d="M9 6V3"/> <path d="m13 7 2-2"/> <circle cx="9" cy="13" r="3"/> <path d="M11.83 12H20a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h2.17"/> <path d="M16 16h2"/>',
+    'folded-sheets': '<rect x="2.5" y="15" width="19" height="5" rx="1.5"/><rect x="3.5" y="10" width="17" height="5" rx="1.5"/><rect x="4.5" y="5" width="15" height="5" rx="1.5"/><path d="M7 15v5"/><path d="M8 10v5"/><path d="M9 5v5"/>',
     'bed-double': '<path d="M2 20v-8a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v8"/> <path d="M4 10V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v4"/> <path d="M12 4v6"/> <path d="M2 18h20"/>',
     'flower-2': '<path d="M12 5a3 3 0 1 1 3 3m-3-3a3 3 0 1 0-3 3m3-3v1M9 8a3 3 0 1 0 3 3M9 8h1m5 0a3 3 0 1 1-3 3m3-3h-1m-2 3v-1"/> <circle cx="12" cy="8" r="2"/> <path d="M12 10v12"/> <path d="M12 22c4.2 0 7-1.667 7-5-4.2 0-7 1.667-7 5Z"/> <path d="M12 22c-4.2 0-7-1.667-7-5 4.2 0 7 1.667 7 5Z"/>',
     'droplet': '<path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"/>',

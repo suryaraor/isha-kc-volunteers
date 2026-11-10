@@ -29,7 +29,8 @@ const MATERIALS_SEED = [
   ['picture', 'Sadhguru picture', '🖼️', 1, 'yes'],
   ['chair', 'Sadhguru chair', '🪑', 1, 'yes'],
   ['speaker', 'Speaker', '🔊', 1, 'yes'],
-  ['yellowbox', 'Yellow box', '📦', 1, 'yes']
+  ['yellowbox', 'Yellow box', '📦', 1, 'yes'],
+  ['projector', 'Projector and screen', '📽️', 1, 'yes']
 ];
 const MATERIAL_SIGNUP_HEADERS = ['Month', 'Satsang Date', 'Item Key', 'Item', 'Volunteer ID', 'Volunteer Name', 'Signed Up At'];
 
