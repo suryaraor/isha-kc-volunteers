@@ -23,7 +23,7 @@ const MATERIAL_SIGNUPS_SHEET = 'Material Signups';
 const MATERIALS_HEADERS = ['Key', 'Item', 'Icon', 'People Needed', 'Active'];
 const MATERIALS_SEED = [
   ['whitesheets', 'White sheets', '🛏️', 1, 'yes'],
-  ['flowers', 'Flowers', '🌸', 2, 'yes'],
+  ['flowers', 'Flowers', '🌸', 1, 'yes'],
   ['oil', 'Oil', '🪔', 1, 'yes'],
   ['bin', 'Satsang bin', '🧺', 1, 'yes'],
   ['picture', 'Sadhguru picture', '🖼️', 1, 'yes'],
