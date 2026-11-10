@@ -97,35 +97,48 @@ async function refresh() {
 
 function showView() {
     showError('');
-    show('stepIdentify', !mstate.me);
-    show('stepMaterials', !!mstate.me);
-    if (mstate.me) {
-        $('meName').textContent = mstate.me.name;
-        renderMaterials();
-    } else {
-        renderActive();
-    }
+    show('stepMaterials', true);
+    show('whoBox', !mstate.me);
+    show('meBar', !!mstate.me);
+    $('gridTitle').textContent = mstate.me ? 'What will you bring?' : "This month's status";
+    $('gridHint').textContent = mstate.me
+        ? 'Tap an item, then choose this month, the whole year, or pick months.'
+        : 'Type your name above to sign up.';
+    $('materialGrid').classList.toggle('readonly', !mstate.me);
+    if (mstate.me) $('meName').textContent = mstate.me.name;
+    else renderActive();
+    renderMaterials();
     renderCounts();
 }
 
+// Names only show once something is typed
 function renderActive() {
     const q = normalize($('identifySearch').value);
     const list = $('activeList');
     list.replaceChildren();
-    const matches = mstate.active
-        .filter((a) => normalize(a.name).includes(q))
-        .sort((a, b) => a.name.localeCompare(b.name));
+    const matches = q
+        ? mstate.active
+            .filter((a) => normalize(a.name).includes(q))
+            .sort((a, b) => {
+                const as = normalize(a.name).startsWith(q) ? 0 : 1;
+                const bs = normalize(b.name).startsWith(q) ? 0 : 1;
+                return as - bs || a.name.localeCompare(b.name);
+            })
+            .slice(0, 8)
+        : [];
     matches.forEach((a) => {
-        const item = el('div', 'result-item');
-        item.appendChild(el('span', 'name', a.name));
+        const item = el('button', 'who-item', a.name);
+        item.type = 'button';
         item.addEventListener('click', () => {
             mstate.me = { id: a.id, name: a.name };
             localStorage.setItem('kc_meId', a.id);
+            $('identifySearch').value = '';
             showView();
         });
         list.appendChild(item);
     });
-    show('noActive', matches.length === 0);
+    show('activeList', matches.length > 0);
+    show('noActive', !!q && matches.length === 0);
 }
 
 const takenBy = (key, month = CYCLE.key) => mstate.signups.filter((s) => s.key === key && s.month === month);
@@ -169,7 +182,12 @@ function renderMaterials() {
         if (others.length) tile.appendChild(el('span', 'mat-who', (mine ? 'Also: ' : '') + others.join(', ')));
         if (ahead) tile.appendChild(el('span', 'mat-ahead', `🔁 +${ahead} more month${ahead === 1 ? '' : 's'}`));
         tile.setAttribute('aria-label', `${m.name}: ${status}${others.length ? `, ${others.join(', ')}` : ''}${ahead ? `, plus ${ahead} more months` : ''}`);
-        tile.addEventListener('click', () => openSheet(m));
+        tile.addEventListener('click', () => {
+            if (mstate.me) return openSheet(m);
+            showToast('👆 Type your name first to sign up.');
+            $('identifySearch').scrollIntoView({ behavior: 'smooth', block: 'center' });
+            $('identifySearch').focus();
+        });
         grid.appendChild(tile);
     });
 

@@ -150,21 +150,37 @@ function whatsappNumber(phone) {
     return digits.length >= 11 ? digits : '';
 }
 
+// Volunteers not yet reached this month come first; reached ones sink to the bottom.
+// Array.sort is stable, so each group keeps its original order.
+const isReached = (v) => !!(v.status && v.status.reached);
+const byReached = (a, b) => isReached(a) - isReached(b);
+
 function renderMine() {
     const list = $('mineList');
     list.replaceChildren();
     $('mineCount').textContent = state.mine.length;
-    state.mine.forEach((v) => list.appendChild(volunteerCard(v)));
+    [...state.mine].sort(byReached).forEach((v) => list.appendChild(volunteerCard(v)));
     show('noMine', state.mine.length === 0);
+}
+
+// Re-order the existing cards in place (keeps which ones are open) once a card is closed,
+// so a card never jumps away while you are still answering its questions
+function reorderMine() {
+    const list = $('mineList');
+    [...state.mine].sort(byReached).forEach((v) => v.card && list.appendChild(v.card));
 }
 
 function volunteerCard(v) {
     v.status = v.status || {};
     const card = el('details', 'vcard');
+    v.card = card;
     card.open = state.open.has(v.id);
     card.addEventListener('toggle', () => {
         if (card.open) state.open.add(v.id);
-        else state.open.delete(v.id);
+        else {
+            state.open.delete(v.id);
+            reorderMine();
+        }
     });
 
     // Collapsed row: name plus one icon per question showing this month's answer

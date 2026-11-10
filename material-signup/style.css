@@ -112,3 +112,24 @@ body.sheet-open { overflow: hidden; }
 @media (min-width: 520px) {
     .month-grid { grid-template-columns: repeat(4, 1fr); }
 }
+
+/* ---------- Simple name box: names appear only while typing ---------- */
+.who-box { padding: 14px 20px 0; position: relative; }
+.who-input {
+    width: 100%; padding: 14px 16px; font-size: 16px; border: 2px solid #e9ecef;
+    border-radius: 12px; outline: none; background: #fafbfc;
+}
+.who-input:focus { border-color: #667eea; background: white; box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15); }
+.who-results { margin-top: 6px; border: 2px solid #e9ecef; border-radius: 12px; overflow: hidden; background: white; box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08); }
+.who-item {
+    display: block; width: 100%; text-align: left; padding: 14px 16px; min-height: 48px;
+    border: none; border-bottom: 1px solid #f1f3f5; background: white; font: inherit; font-size: 16px; color: #333; cursor: pointer;
+}
+.who-item:last-child { border-bottom: none; }
+.who-item:active, .who-item:hover { background: #eef0ff; }
+.who-none { margin-top: 8px; padding: 4px 6px; color: #6c757d; font-size: 14px; }
+.mat-grid.readonly .mat { cursor: default; }
+
+@media (max-width: 480px) {
+    .who-box { padding: 12px 12px 0; }
+}
