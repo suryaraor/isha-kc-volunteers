@@ -15,6 +15,24 @@ const STATUS_FIELDS = {
 const STATUS_HEADERS = ['Month', 'Satsang Date', 'Volunteer ID', 'Volunteer Name', 'Assigned To ID', 'Assigned To']
   .concat(Object.keys(STATUS_FIELDS).map(k => STATUS_FIELDS[k].header), ['Updated At']);
 
+// Satsang material signups (material-signup/ page). Both tabs are created automatically.
+// Edit the Materials tab to rename items, change icons, set how many people each needs,
+// or set Active to "no" to hide one. Keep the Key column unchanged once people sign up.
+const MATERIALS_SHEET = 'Materials';
+const MATERIAL_SIGNUPS_SHEET = 'Material Signups';
+const MATERIALS_HEADERS = ['Key', 'Item', 'Icon', 'People Needed', 'Active'];
+const MATERIALS_SEED = [
+  ['whitesheets', 'White sheets', '🛏️', 1, 'yes'],
+  ['flowers', 'Flowers', '🌸', 2, 'yes'],
+  ['oil', 'Oil', '🪔', 1, 'yes'],
+  ['bin', 'Satsang bin', '🧺', 1, 'yes'],
+  ['picture', 'Sadhguru picture', '🖼️', 1, 'yes'],
+  ['chair', 'Sadhguru chair', '🪑', 1, 'yes'],
+  ['speaker', 'Speaker', '🔊', 1, 'yes'],
+  ['yellowbox', 'Yellow box', '📦', 1, 'yes']
+];
+const MATERIAL_SIGNUP_HEADERS = ['Month', 'Satsang Date', 'Item Key', 'Item', 'Volunteer ID', 'Volunteer Name', 'Signed Up At'];
+
 function doGet(e) {
   const p = e.parameter || {};
   let result;
@@ -28,6 +46,15 @@ function doGet(e) {
         break;
       case 'setStatus':
         result = withLock(() => setStatus(p.activeId, p.month, p.satsang, p.id, p.field, p.value));
+        break;
+      case 'getMaterials':
+        result = getMaterials(p.month);
+        break;
+      case 'materialSignup':
+        result = withLock(() => materialSignup(p.activeId, p.month, p.satsang, p.key));
+        break;
+      case 'materialCancel':
+        result = withLock(() => materialCancel(p.activeId, p.month, p.key));
         break;
       case 'claim':
         result = withLock(() => claim(p.activeId, splitIds(p.ids)));
@@ -237,4 +264,79 @@ function release(activeId, ids) {
   });
   SpreadsheetApp.flush();
   return { success: true, released: released };
+}
+
+// ---------- Satsang material signups (one row per person per item per Satsang month) ----------
+function ensureSheet(name, headers, textCols, seed) {
+  const ss = spreadsheet();
+  let sheet = ss.getSheetByName(name);
+  if (!sheet) {
+    sheet = ss.insertSheet(name);
+    sheet.getRange(1, 1, 1, headers.length).setValues([headers]).setFontWeight('bold');
+    (textCols || []).forEach(a1 => sheet.getRange(a1).setNumberFormat('@'));
+    sheet.setFrozenRows(1);
+    if (seed && seed.length) sheet.getRange(2, 1, seed.length, seed[0].length).setValues(seed);
+  }
+  return sheet;
+}
+
+function readMaterials() {
+  const data = ensureSheet(MATERIALS_SHEET, MATERIALS_HEADERS, [], MATERIALS_SEED).getDataRange().getValues();
+  const items = [];
+  for (let i = 1; i < data.length; i++) {
+    const r = data[i];
+    const key = String(r[0]).trim();
+    if (!key || String(r[4]).trim().toLowerCase() === 'no') continue;
+    items.push({ key: key, name: String(r[1]).trim() || key, icon: String(r[2]).trim() || '📦', slots: Math.max(1, Number(r[3]) || 1) });
+  }
+  return items;
+}
+
+function readMaterialSignups(month) {
+  const sheet = ensureSheet(MATERIAL_SIGNUPS_SHEET, MATERIAL_SIGNUP_HEADERS, ['A:A']);
+  const data = sheet.getDataRange().getValues();
+  const out = [];
+  for (let i = 1; i < data.length; i++) {
+    const r = data[i];
+    if (monthKey(r[0]) !== month) continue;
+    out.push({ row: i + 1, key: String(r[2]).trim(), id: String(r[4]).trim(), name: String(r[5]).trim() });
+  }
+  return { sheet: sheet, signups: out };
+}
+
+function getMaterials(month) {
+  if (!/^\d{4}-\d{2}$/.test(String(month))) return { success: false, error: 'Invalid month' };
+  const signups = readMaterialSignups(String(month)).signups
+    .map(s => ({ key: s.key, id: s.id, name: s.name }));
+  return { success: true, items: readMaterials(), signups: signups };
+}
+
+function materialSignup(activeId, month, satsang, key) {
+  if (!/^\d{4}-\d{2}$/.test(String(month))) return { success: false, error: 'Invalid month' };
+  const { rows } = readSheet();
+  const me = rows.find(r => r.active && r.id === String(activeId));
+  if (!me) return { success: false, error: 'Active volunteer not found' };
+  const item = readMaterials().find(m => m.key === String(key));
+  if (!item) return { success: false, error: 'Unknown item' };
+
+  const { sheet, signups } = readMaterialSignups(String(month));
+  const forItem = signups.filter(s => s.key === item.key);
+  if (!forItem.some(s => s.id === me.id)) {
+    if (forItem.length >= item.slots) {
+      return { success: false, error: `${item.name} is already covered by ${forItem.map(s => s.name).join(', ')}` };
+    }
+    sheet.appendRow([String(month), satsang || '', item.key, item.name, me.id, me.name, new Date()]);
+    SpreadsheetApp.flush();
+  }
+  return getMaterials(month);
+}
+
+function materialCancel(activeId, month, key) {
+  const { sheet, signups } = readMaterialSignups(String(month));
+  // Delete bottom-up so row numbers stay valid
+  signups.filter(s => s.key === String(key) && s.id === String(activeId))
+    .sort((a, b) => b.row - a.row)
+    .forEach(s => sheet.deleteRow(s.row));
+  SpreadsheetApp.flush();
+  return getMaterials(month);
 }

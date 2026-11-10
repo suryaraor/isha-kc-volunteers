@@ -1,0 +1,56 @@
+/* Material signup page. Base styles (header, countdown, lists, toast) come from ../style.css */
+
+.my-summary {
+    margin: 0 20px 12px; padding: 12px 14px; border-radius: 12px;
+    background: #eaf7ef; color: #1e6b34; font-size: 15px; font-weight: 600;
+}
+
+.mat-grid {
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;
+    padding: 0 20px 8px;
+}
+
+.mat {
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+    min-height: 138px; padding: 12px 8px; border-radius: 16px; border: 2px solid #e9ecef;
+    background: #fafbfc; font: inherit; color: #333; cursor: pointer; text-align: center;
+    -webkit-tap-highlight-color: transparent; touch-action: manipulation;
+    transition: transform 0.1s, border-color 0.15s, background 0.15s;
+}
+.mat:active { transform: scale(0.96); }
+.mat-icon { font-size: 44px; line-height: 1.1; }
+.mat-name { font-size: 15px; font-weight: 600; }
+.mat-status { font-size: 12px; font-weight: 700; padding: 3px 10px; border-radius: 999px; margin-top: 2px; }
+.mat-who { font-size: 12px; color: #6c757d; line-height: 1.3; }
+
+/* Still needed: warm and inviting */
+.mat.open { border-color: #ffd28a; background: #fffaf0; }
+.mat.open .mat-status { background: #ff9f1c; color: white; }
+
+/* Someone else has it */
+.mat.full { background: #f1f3f5; }
+.mat.full .mat-icon { filter: grayscale(0.5); opacity: 0.7; }
+.mat.full .mat-status { background: #dee2e6; color: #495057; }
+
+/* You have it */
+.mat.mine { border-color: #34a853; background: #eaf7ef; box-shadow: 0 4px 12px rgba(52, 168, 83, 0.18); }
+.mat.mine .mat-status { background: #34a853; color: white; }
+
+.mat.saving { border-style: dashed; opacity: 0.8; }
+
+.mat-actions { padding: 16px 20px 22px; display: flex; flex-direction: column; gap: 14px; align-items: center; }
+.share-btn {
+    width: 100%; padding: 15px; font-size: 16px; font-weight: 600; color: white;
+    background: #25d366; border: none; border-radius: 12px; cursor: pointer;
+}
+.share-btn:active { transform: scale(0.98); }
+.back-link { color: #667eea; font-size: 14px; text-decoration: none; }
+
+@media (min-width: 520px) {
+    .mat-grid { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 480px) {
+    .mat-grid { padding: 0 12px 8px; gap: 8px; }
+    .my-summary { margin: 0 12px 12px; }
+    .mat-actions { padding: 14px 12px 20px; }
+}

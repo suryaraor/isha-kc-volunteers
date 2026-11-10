@@ -10,6 +10,16 @@ The top of the page counts down to the next Satsang (2nd Saturday of the month).
 
 Under "Your volunteers", each person is a collapsible card with four icon questions: how you reached them, their Shambhavi practice, whether they're coming to Satsang, and how their personal life is going. Each tap saves right away to a `Status` tab, one row per volunteer per month (the tab is created automatically). Tapping a different answer overwrites that month's value. When a new month starts, the cards start out blank and the earlier months stay in the sheet.
 
+## Satsang material signups
+
+Live at `https://suryaraor.github.io/isha-kc-volunteers/material-signup/` (also linked from the countdown on the outreach page).
+
+Active volunteers pick their name, which is shared with the outreach page in the same browser, and tap an item tile to sign up to bring it to this month's Satsang. Tapping it again cancels. Tiles are orange while still needed, green when you have them, and grey when someone else has them. The header counts how many items are still needed, and a button shares the open list to WhatsApp.
+
+It uses the same sheet and Apps Script as the outreach page. Two tabs are created automatically on first load:
+- `Materials`: the item list (Key, Item, Icon, People Needed, Active). Edit it to rename items, change icons, ask for more than one person, or set Active to `no` to hide an item. Don't change a Key once people have signed up for it.
+- `Material Signups`: one row per person per item per Satsang month.
+
 ## Setup
 
 1. **Create the sheet.** In Google Sheets, create a new spreadsheet, then File > Import > Upload `volunteers-sheet.csv` and choose "Replace current sheet". Rename the tab to `Volunteers`.
