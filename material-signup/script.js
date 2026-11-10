@@ -72,8 +72,12 @@ async function init() {
     show('loadingIndicator', false);
 }
 
+// Icons to use when the sheet still has the generic 📦 for an item (so it isn't confused with
+// the Yellow box). An icon typed into the Materials tab always wins over these.
+const ICON_FALLBACKS = { carpets: '🟥' };
+
 function applyMaterials(d) {
-    mstate.items = d.items;
+    mstate.items = d.items.map((m) => (m.icon === '📦' && ICON_FALLBACKS[m.key] ? { ...m, icon: ICON_FALLBACKS[m.key] } : m));
     // Older backend versions don't send a month; treat those rows as this month
     mstate.signups = d.signups.map((s) => ({ ...s, month: s.month || CYCLE.key }));
 }
