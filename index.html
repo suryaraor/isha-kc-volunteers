@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Isha KC Volunteer Outreach</title>
-    <link rel="stylesheet" href="style.css?v=2">
+    <link rel="stylesheet" href="style.css?v=3">
 </head>
 <body>
     <div class="container">
@@ -15,6 +15,21 @@
                 <div class="count-number" id="assignedCount">0</div>
                 <div class="count-label">of <span id="totalCount">0</span></div>
             </div>
+        </div>
+
+        <!-- Satsang month countdown -->
+        <div class="cycle" id="cycleBar">
+            <div class="cycle-top">
+                <div>
+                    <div class="cycle-month" id="cycleMonth"></div>
+                    <div class="cycle-target">🎯 Satsang: <strong id="cycleTarget"></strong></div>
+                </div>
+                <div class="cycle-left"><span id="cycleDays">0</span><small id="cycleDaysLabel">days left</small></div>
+            </div>
+            <div class="progress" role="progressbar" aria-label="Days until Satsang" id="cycleProgress">
+                <div class="progress-fill" id="cycleFill"></div>
+            </div>
+            <div class="cycle-range"><span id="cycleStart"></span><span id="cycleEnd"></span></div>
         </div>
 
         <div id="loadingIndicator" class="loading"><p>Loading data...</p></div>
@@ -43,22 +58,30 @@
 
             <div class="section-head">
                 <h2>Your volunteers <span class="pill" id="mineCount">0</span></h2>
+                <p>Tap a name to open it, then tap the icons to record this month's check-in.</p>
             </div>
             <div id="mineList" class="results-list"></div>
-            <div id="noMine" class="no-results" style="display: none;"><p>You haven't picked anyone yet.</p></div>
+            <div id="noMine" class="no-results" style="display: none;"><p>You haven't picked anyone yet. Tap <strong>➕ Add volunteers</strong> below.</p></div>
 
-            <div class="section-head">
-                <h2>Available volunteers <span class="pill" id="availCount">0</span></h2>
-                <p>Tap to select any number of people, then confirm.</p>
+            <div class="add-wrap">
+                <button id="toggleAddBtn" class="add-btn" aria-expanded="false">
+                    <span class="add-icon">➕</span> Add volunteers <span class="pill light" id="availCount">0</span>
+                </button>
             </div>
-            <div class="search-section">
-                <input type="text" id="pickSearch" class="search-input" placeholder="Search available volunteers..." autocomplete="off">
-            </div>
-            <div id="availList" class="results-list"></div>
-            <div id="noAvail" class="no-results" style="display: none;"><p>No available volunteers.</p></div>
 
-            <div class="action-bar">
-                <button id="assignBtn" class="primary-btn" disabled>Assign selected to me</button>
+            <div id="addPanel" class="add-panel" style="display: none;">
+                <div class="section-head">
+                    <p>Tap people to select them, then confirm.</p>
+                </div>
+                <div class="search-section">
+                    <input type="text" id="pickSearch" class="search-input" placeholder="🔍 Search available volunteers..." autocomplete="off">
+                </div>
+                <div id="availList" class="results-list"></div>
+                <div id="noAvail" class="no-results" style="display: none;"><p>No available volunteers.</p></div>
+
+                <div class="action-bar">
+                    <button id="assignBtn" class="primary-btn" disabled>Assign selected to me</button>
+                </div>
             </div>
         </section>
 
@@ -71,6 +94,6 @@
         </section>
     </div>
 
-    <script src="script.js?v=2"></script>
+    <script src="script.js?v=3"></script>
 </body>
 </html>

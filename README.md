@@ -4,6 +4,12 @@ Static web app (HTML/CSS/JS) with a Google Sheet as the backend, via a Google Ap
 
 **Flow:** an active volunteer opens the page, picks their name, then taps any number of inactive volunteers and confirms. Those people are tied to them and disappear from everyone else's list. The pick list only receives names; phone numbers are sent only for the volunteers already assigned to you, shown under "Your volunteers" as WhatsApp links.
 
+## Monthly check-ins
+
+The top of the page counts down to the next Satsang (2nd Saturday of the month). Each "month" runs from the Sunday after one Satsang through the next one, and is named for the month its Satsang falls in.
+
+Under "Your volunteers", each person is a collapsible card with four icon questions: how you reached them, their Shambhavi practice, whether they're coming to Satsang, and how their personal life is going. Each tap saves right away to a `Status` tab, one row per volunteer per month (the tab is created automatically). Tapping a different answer overwrites that month's value. When a new month starts, the cards start out blank and the earlier months stay in the sheet.
+
 ## Setup
 
 1. **Create the sheet.** In Google Sheets, create a new spreadsheet, then File > Import > Upload `volunteers-sheet.csv` and choose "Replace current sheet". Rename the tab to `Volunteers`.

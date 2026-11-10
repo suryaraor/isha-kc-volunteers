@@ -138,3 +138,93 @@ body {
     body { padding: 10px; }
     .header h1 { font-size: 20px; }
 }
+
+/* ---------- Satsang countdown ---------- */
+.cycle { padding: 16px 20px 14px; background: #fff8ec; border-bottom: 1px solid #f3e3c3; }
+.cycle-top { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.cycle-month { font-size: 22px; font-weight: 700; color: #5a3e00; }
+.cycle-target { font-size: 14px; color: #7a5a1a; margin-top: 2px; }
+.cycle-left { text-align: center; background: #ff9f1c; color: white; border-radius: 12px; padding: 6px 14px; min-width: 76px; }
+.cycle-left span { display: block; font-size: 26px; font-weight: 800; line-height: 1.1; }
+.cycle-left small { font-size: 11px; text-transform: uppercase; letter-spacing: 0.4px; }
+.progress { margin-top: 12px; height: 12px; background: #f3e3c3; border-radius: 999px; overflow: hidden; }
+.progress-fill { height: 100%; width: 0; background: linear-gradient(90deg, #ffcf70, #ff9f1c); border-radius: 999px; transition: width 0.6s ease; }
+.cycle-range { display: flex; justify-content: space-between; font-size: 12px; color: #9a7a3a; margin-top: 6px; }
+
+/* ---------- Volunteer cards ---------- */
+#mineList { max-height: none; overflow: visible; }
+.vcard { background: #f8f9fa; border: 2px solid #e9ecef; border-radius: 14px; margin-bottom: 10px; overflow: hidden; }
+.vcard[open] { background: white; border-color: #667eea; box-shadow: 0 4px 14px rgba(102, 126, 234, 0.15); }
+.vcard.complete { border-color: #34a853; }
+.vcard.complete:not([open]) { background: #eaf7ef; }
+.vcard-head {
+    list-style: none; display: flex; align-items: center; gap: 10px;
+    padding: 14px 14px 14px 16px; cursor: pointer; min-height: 56px;
+    -webkit-tap-highlight-color: transparent; user-select: none;
+}
+.vcard-head::-webkit-details-marker { display: none; }
+.vcard-head .info { flex: 1; min-width: 0; }
+.vcard-head .name { font-size: 16px; font-weight: 600; color: #333; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.done-icons { display: flex; gap: 3px; }
+.di { width: 26px; height: 26px; border-radius: 50%; background: #e9ecef; display: grid; place-items: center; font-size: 15px; }
+.di.on { background: #fff; box-shadow: 0 0 0 1px #dfe3ea; }
+.chev { font-size: 26px; color: #999; transition: transform 0.2s; line-height: 1; }
+.vcard[open] .chev { transform: rotate(90deg); color: #667eea; }
+
+.vcard-body { padding: 0 14px 14px; }
+.phone-line { font-size: 14px; color: #6c757d; margin-bottom: 8px; }
+.contact { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 6px; }
+.contact-btn {
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+    padding: 10px 6px; border-radius: 10px; background: #e8f7f3; color: #0f6e60;
+    text-decoration: none; font-size: 14px; font-weight: 600; min-height: 44px;
+}
+.contact-btn:active { transform: scale(0.97); }
+.contact-btn .ci { font-size: 18px; }
+
+.q { margin-top: 14px; }
+.q-title { font-size: 15px; font-weight: 600; color: #444; margin-bottom: 8px; }
+.opts { display: grid; gap: 8px; transition: opacity 0.2s; }
+.opts.n3 { grid-template-columns: repeat(3, 1fr); }
+.opts.n4 { grid-template-columns: repeat(4, 1fr); }
+.opt {
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+    min-height: 76px; padding: 8px 4px; border: 2px solid #e9ecef; border-radius: 14px;
+    background: #fafbfc; cursor: pointer; font: inherit; color: #555;
+    -webkit-tap-highlight-color: transparent; touch-action: manipulation;
+    transition: transform 0.1s, border-color 0.15s, background 0.15s;
+}
+.opt:active { transform: scale(0.94); }
+.opt-icon { font-size: 30px; line-height: 1; filter: grayscale(0.6); opacity: 0.75; transition: filter 0.15s, opacity 0.15s, transform 0.15s; }
+.opt-label { font-size: 12px; line-height: 1.2; text-align: center; }
+.opt[aria-pressed="true"] { border-color: #667eea; background: #eef0ff; color: #3d3d9e; font-weight: 600; }
+.opt[aria-pressed="true"] .opt-icon { filter: none; opacity: 1; transform: scale(1.12); }
+.opts.saving .opt[aria-pressed="true"] { border-style: dashed; }
+.opts.saved .opt[aria-pressed="true"] { border-color: #34a853; background: #eaf7ef; }
+
+.vcard-foot { margin-top: 16px; text-align: right; }
+
+/* ---------- Add volunteers ---------- */
+.add-wrap { padding: 8px 20px 20px; }
+.add-btn {
+    width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px;
+    padding: 16px; font-size: 17px; font-weight: 600; color: #667eea;
+    background: #f4f5ff; border: 2px dashed #667eea; border-radius: 14px; cursor: pointer;
+}
+.add-btn.open { background: #667eea; color: white; border-style: solid; }
+.add-btn .pill.light { background: rgba(102, 126, 234, 0.15); color: inherit; }
+.add-btn.open .pill.light { background: rgba(255, 255, 255, 0.25); }
+.add-panel { border-top: 1px solid #e9ecef; }
+.add-panel .section-head { padding-top: 12px; }
+
+@media (max-width: 480px) {
+    .cycle { padding: 14px 16px 12px; }
+    .cycle-month { font-size: 19px; }
+    .results-list, .add-wrap { padding-left: 12px; padding-right: 12px; }
+    .vcard-body { padding: 0 10px 12px; }
+    .opts { gap: 6px; }
+    .opt { min-height: 72px; border-radius: 12px; }
+    .opt-icon { font-size: 28px; }
+    .opt-label { font-size: 11px; }
+    .di { width: 22px; height: 22px; font-size: 13px; }
+}
