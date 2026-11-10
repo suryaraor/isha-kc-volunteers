@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Satsang Materials Signup</title>
     <link rel="stylesheet" href="../style.css?v=4">
-    <link rel="stylesheet" href="style.css?v=1">
+    <link rel="stylesheet" href="style.css?v=2">
 </head>
 <body>
     <div class="container">
@@ -59,7 +59,7 @@
 
             <div class="section-head">
                 <h2>What will you bring?</h2>
-                <p>Tap an item to sign up. Tap it again to cancel.</p>
+                <p>Tap an item, then choose this month, the whole year, or pick months.</p>
             </div>
             <div id="mySummary" class="my-summary" style="display: none;"></div>
             <div id="materialGrid" class="mat-grid"></div>
@@ -79,7 +79,28 @@
         </section>
     </div>
 
+    <!-- Month picker for one item: slides up from the bottom -->
+    <div id="sheetBackdrop" class="sheet-backdrop" style="display: none;"></div>
+    <div id="monthSheet" class="month-sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle" style="display: none;">
+        <div class="sheet-grip"></div>
+        <div class="sheet-head">
+            <span class="sheet-icon" id="sheetIcon"></span>
+            <div class="sheet-titles">
+                <h3 id="sheetTitle"></h3>
+                <p>Which Satsangs can you bring it to?</p>
+            </div>
+            <button id="sheetClose" class="sheet-close" aria-label="Close">✕</button>
+        </div>
+        <div class="quick-picks">
+            <button id="pickThis" class="qp" type="button"><span>📅</span>This month</button>
+            <button id="pickYear" class="qp" type="button"><span>🔁</span>Whole year</button>
+            <button id="pickNone" class="qp" type="button"><span>↺</span>Clear</button>
+        </div>
+        <div id="monthGrid" class="month-grid"></div>
+        <button id="sheetSave" class="primary-btn sheet-save" type="button">Save</button>
+    </div>
+
     <script src="../common.js?v=4"></script>
-    <script src="script.js?v=1"></script>
+    <script src="script.js?v=3"></script>
 </body>
 </html>

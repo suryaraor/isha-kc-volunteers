@@ -14,11 +14,11 @@ Under "Your volunteers", each person is a collapsible card with four icon questi
 
 Live at `https://suryaraor.github.io/isha-kc-volunteers/material-signup/` (also linked from the countdown on the outreach page).
 
-Active volunteers pick their name, which is shared with the outreach page in the same browser, and tap an item tile to sign up to bring it to this month's Satsang. Tapping it again cancels. Tiles are orange while still needed, green when you have them, and grey when someone else has them. The header counts how many items are still needed, and a button shares the open list to WhatsApp.
+Active volunteers pick their name, which is shared with the outreach page in the same browser, and tap an item tile. A panel slides up where they choose **This month**, **Whole year** (the next 12 Satsangs), or tap any specific months. Months someone else already covers are greyed out and skipped. Reopening the tile shows their months, so they can add or drop months, or cancel them all. Tiles are orange while still needed, green when you have them, and grey when someone else has them. The header counts how many items are still needed, and a button shares the open list to WhatsApp.
 
 It uses the same sheet and Apps Script as the outreach page. Two tabs are created automatically on first load:
 - `Materials`: the item list (Key, Item, Icon, People Needed, Active). Edit it to rename items, change icons, ask for more than one person, or set Active to `no` to hide an item. Don't change a Key once people have signed up for it.
-- `Material Signups`: one row per person per item per Satsang month.
+- `Material Signups`: one row per person per item per Satsang month. A whole-year signup writes 12 rows, one per month.
 
 ## Setup
 

@@ -2,9 +2,26 @@
 const mstate = {
     active: [],
     items: [], // { key, name, icon, slots }
-    signups: [], // { key, id, name } for this Satsang month
+    signups: [], // { month, key, id, name } for this Satsang month and later
     me: null,
     busy: new Set() // item keys with a save in flight
+};
+
+// The next 12 Satsangs, starting with this cycle's: { key: '2026-11', date, short: 'Nov 14', label: "Nov '26" }
+const MONTHS_AHEAD = 12;
+const UPCOMING = Array.from({ length: MONTHS_AHEAD }, (_, i) => {
+    const date = secondSaturday(CYCLE.target.getFullYear(), CYCLE.target.getMonth() + i);
+    return {
+        key: `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`,
+        date,
+        month: date.toLocaleDateString(undefined, { month: 'short' }),
+        year: String(date.getFullYear()).slice(2),
+        day: date.getDate()
+    };
+});
+const monthName = (key) => {
+    const u = UPCOMING.find((x) => x.key === key);
+    return u ? `${u.month} ${u.day}` : key;
 };
 
 document.addEventListener('DOMContentLoaded', init);
@@ -26,9 +43,18 @@ async function init() {
         showView();
     });
     $('shareBtn').addEventListener('click', shareNeeded);
+    $('sheetClose').addEventListener('click', closeSheet);
+    $('sheetBackdrop').addEventListener('click', closeSheet);
+    $('pickThis').addEventListener('click', () => setPicked([CYCLE.key]));
+    $('pickYear').addEventListener('click', () => setPicked(UPCOMING.map((u) => u.key)));
+    $('pickNone').addEventListener('click', () => setPicked([]));
+    $('sheetSave').addEventListener('click', saveSheet);
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeSheet();
+    });
     // Pick up other people's signups when coming back to the tab
     document.addEventListener('visibilitychange', () => {
-        if (document.visibilityState === 'visible' && mstate.me && !mstate.busy.size) refresh();
+        if (document.visibilityState === 'visible' && mstate.me && !mstate.busy.size && !sheet.item) refresh();
     });
 
     show('loadingIndicator', true);
@@ -48,7 +74,8 @@ async function init() {
 
 function applyMaterials(d) {
     mstate.items = d.items;
-    mstate.signups = d.signups;
+    // Older backend versions don't send a month; treat those rows as this month
+    mstate.signups = d.signups.map((s) => ({ ...s, month: s.month || CYCLE.key }));
 }
 
 async function loadMaterials() {
@@ -97,13 +124,18 @@ function renderActive() {
     show('noActive', matches.length === 0);
 }
 
-const takenBy = (key) => mstate.signups.filter((s) => s.key === key);
-const isMine = (key) => takenBy(key).some((s) => s.id === mstate.me?.id);
+const takenBy = (key, month = CYCLE.key) => mstate.signups.filter((s) => s.key === key && s.month === month);
+const isMine = (key, month = CYCLE.key) => takenBy(key, month).some((s) => s.id === mstate.me?.id);
+const myMonths = (key) => UPCOMING.map((u) => u.key).filter((m) => isMine(key, m));
 
 function renderCounts() {
     const needed = mstate.items.filter((m) => takenBy(m.key).length < m.slots).length;
     $('neededCount').textContent = mstate.items.length ? needed : '–';
     $('itemCount').textContent = mstate.items.length || '–';
+}
+
+function firstName(name) {
+    return String(name).split(/\s+/).slice(0, 2).join(' ');
 }
 
 function renderMaterials() {
@@ -113,6 +145,7 @@ function renderMaterials() {
         const people = takenBy(m.key);
         const mine = isMine(m.key);
         const full = people.length >= m.slots;
+        const ahead = myMonths(m.key).filter((k) => k !== CYCLE.key).length;
         const tile = el('button', 'mat');
         tile.type = 'button';
         tile.classList.add(mine ? 'mine' : full ? 'full' : 'open');
@@ -121,50 +154,148 @@ function renderMaterials() {
 
         const status = mine ? '✓ You' : full ? '✓ Covered' : m.slots > 1 ? `Need ${m.slots - people.length} more` : 'Needed';
         tile.append(el('span', 'mat-icon', m.icon), el('span', 'mat-name', m.name), el('span', 'mat-status', status));
-        if (people.length) {
-            const who = el('span', 'mat-who', people.map((p) => (p.id === mstate.me?.id ? 'You' : firstName(p.name))).join(', '));
-            tile.appendChild(who);
-        }
-        tile.addEventListener('click', () => toggle(m));
+        // Names under the badge, leaving out "You" when the badge already says it
+        const others = people.filter((p) => p.id !== mstate.me?.id).map((p) => firstName(p.name));
+        if (others.length) tile.appendChild(el('span', 'mat-who', (mine ? 'Also: ' : '') + others.join(', ')));
+        if (ahead) tile.appendChild(el('span', 'mat-ahead', `🔁 +${ahead} more month${ahead === 1 ? '' : 's'}`));
+        tile.setAttribute('aria-label', `${m.name}: ${status}${others.length ? `, ${others.join(', ')}` : ''}${ahead ? `, plus ${ahead} more months` : ''}`);
+        tile.addEventListener('click', () => openSheet(m));
         grid.appendChild(tile);
     });
 
     const mineItems = mstate.items.filter((m) => isMine(m.key));
-    $('mySummary').textContent = mineItems.length
-        ? `🙏 You're bringing: ${mineItems.map((m) => `${m.icon} ${m.name}`).join(', ')}`
-        : '';
-    show('mySummary', mineItems.length > 0);
+    const aheadItems = mstate.items
+        .map((m) => ({ m, n: myMonths(m.key).filter((k) => k !== CYCLE.key).length }))
+        .filter((x) => x.n);
+    const lines = [];
+    if (mineItems.length) lines.push(`🙏 This Satsang you're bringing: ${mineItems.map((m) => `${m.icon} ${m.name}`).join(', ')}`);
+    if (aheadItems.length) lines.push(`🔁 Coming months: ${aheadItems.map((x) => `${x.m.icon} ${x.m.name} ×${x.n}`).join(', ')}`);
+    const box = $('mySummary');
+    box.replaceChildren(...lines.map((l) => el('div', '', l)));
+    show('mySummary', lines.length > 0);
     renderCounts();
 }
 
-function firstName(name) {
-    return String(name).split(/\s+/).slice(0, 2).join(' ');
+// ---------- Month picker (bottom sheet) ----------
+const sheet = { item: null, picked: new Set() };
+
+function openSheet(m) {
+    if (mstate.busy.has(m.key)) return;
+    sheet.item = m;
+    sheet.picked = new Set(myMonths(m.key));
+    // First tap on an open item: pre-select this month so one more tap on Save is enough
+    if (!sheet.picked.size && takenBy(m.key).length < m.slots) sheet.picked.add(CYCLE.key);
+    $('sheetIcon').textContent = m.icon;
+    $('sheetTitle').textContent = m.name;
+    renderSheet();
+    show('sheetBackdrop', true);
+    show('monthSheet', true);
+    document.body.classList.add('sheet-open');
+    requestAnimationFrame(() => $('monthSheet').classList.add('up'));
 }
 
-async function toggle(m) {
-    if (mstate.busy.has(m.key)) return;
-    const mine = isMine(m.key);
-    const people = takenBy(m.key);
-    if (!mine && people.length >= m.slots) {
-        showToast(`${m.icon} ${m.name} is already covered by ${people.map((p) => p.name).join(', ')}. 🙏`);
-        return;
-    }
+function closeSheet() {
+    if (!sheet.item) return;
+    sheet.item = null;
+    $('monthSheet').classList.remove('up');
+    show('sheetBackdrop', false);
+    show('monthSheet', false);
+    document.body.classList.remove('sheet-open');
+}
+
+function setPicked(keys) {
+    const m = sheet.item;
+    // Skip months other people have already filled
+    sheet.picked = new Set(keys.filter((k) => isMine(m.key, k) || takenBy(m.key, k).length < m.slots));
+    renderSheet();
+}
+
+function renderSheet() {
+    const m = sheet.item;
+    const grid = $('monthGrid');
+    grid.replaceChildren();
+    UPCOMING.forEach((u) => {
+        const people = takenBy(m.key, u.key);
+        const mineHere = isMine(m.key, u.key);
+        const others = people.filter((p) => p.id !== mstate.me.id);
+        const full = !mineHere && people.length >= m.slots;
+        const on = sheet.picked.has(u.key);
+        const b = el('button', 'mchip');
+        b.type = 'button';
+        b.disabled = full;
+        b.setAttribute('aria-pressed', on);
+        if (full) b.classList.add('full');
+        if (u.key === CYCLE.key) b.classList.add('now');
+        b.append(el('span', 'mchip-mon', `${u.month} ’${u.year}`), el('span', 'mchip-day', `Sat ${u.day}`));
+        const note = full ? `✓ ${firstName(others[0].name)}`
+            : on ? '✓ You'
+                : others.length ? `${others.length}/${m.slots} · ${firstName(others[0].name)}`
+                    : u.key === CYCLE.key ? 'This month' : '';
+        b.appendChild(el('span', 'mchip-note', note));
+        b.setAttribute('aria-label', `${u.month} ${u.day}: ${full ? `covered by ${others.map((p) => p.name).join(', ')}` : on ? 'selected' : 'not selected'}`);
+        b.addEventListener('click', () => {
+            if (sheet.picked.has(u.key)) sheet.picked.delete(u.key);
+            else sheet.picked.add(u.key);
+            if (navigator.vibrate) navigator.vibrate(10);
+            renderSheet();
+        });
+        grid.appendChild(b);
+    });
+
+    const open = UPCOMING.filter((u) => isMine(m.key, u.key) || takenBy(m.key, u.key).length < m.slots).map((u) => u.key);
+    const all = open.length > 0 && open.every((k) => sheet.picked.has(k));
+    $('pickThis').classList.toggle('on', sheet.picked.size === 1 && sheet.picked.has(CYCLE.key));
+    $('pickYear').classList.toggle('on', all && open.length > 1);
+    $('pickThis').disabled = !open.includes(CYCLE.key);
+
+    const { add, remove } = sheetDiff();
+    const btn = $('sheetSave');
+    btn.disabled = !add.length && !remove.length;
+    const n = sheet.picked.size;
+    btn.textContent = btn.disabled
+        ? (n ? `✓ Signed up for ${n} month${n === 1 ? '' : 's'}` : 'Tap the months you can bring it')
+        : !n ? 'Cancel all my months'
+            : `Save · ${n} month${n === 1 ? '' : 's'}`;
+    btn.classList.toggle('danger', !btn.disabled && !n);
+}
+
+function sheetDiff() {
+    const had = new Set(myMonths(sheet.item.key));
+    return {
+        add: [...sheet.picked].filter((k) => !had.has(k)),
+        remove: [...had].filter((k) => !sheet.picked.has(k))
+    };
+}
+
+async function saveSheet() {
+    const m = sheet.item;
+    const { add, remove } = sheetDiff();
+    if (!add.length && !remove.length) return;
+    closeSheet();
 
     // Show the change right away; the server reply replaces it with the real state
     const before = mstate.signups;
-    mstate.signups = mine
-        ? before.filter((s) => !(s.key === m.key && s.id === mstate.me.id))
-        : before.concat({ key: m.key, id: mstate.me.id, name: mstate.me.name });
+    mstate.signups = before
+        .filter((s) => !(s.key === m.key && s.id === mstate.me.id && remove.includes(s.month)))
+        .concat(add.map((month) => ({ month, key: m.key, id: mstate.me.id, name: mstate.me.name })));
     mstate.busy.add(m.key);
     if (navigator.vibrate) navigator.vibrate(15);
     renderMaterials();
 
+    const msgs = [];
     try {
-        const d = await api(mine
-            ? { action: 'materialCancel', activeId: mstate.me.id, month: CYCLE.key, key: m.key }
-            : { action: 'materialSignup', activeId: mstate.me.id, month: CYCLE.key, satsang: CYCLE.targetYmd, key: m.key });
-        applyMaterials(d);
-        showToast(mine ? `Cancelled ${m.icon} ${m.name}.` : `🙏 Thank you! You're bringing ${m.icon} ${m.name}.`);
+        if (remove.length) {
+            applyMaterials(await api({ action: 'materialCancel', activeId: mstate.me.id, months: remove.join(','), key: m.key }));
+            msgs.push(`Cancelled ${remove.length} month${remove.length === 1 ? '' : 's'}`);
+        }
+        if (add.length) {
+            const d = await api({ action: 'materialSignup', activeId: mstate.me.id, months: add.join(','), key: m.key });
+            applyMaterials(d);
+            const added = d.added ? d.added.length : add.length;
+            if (added) msgs.unshift(`🙏 Thank you! ${m.icon} ${m.name} for ${added === 1 ? monthName(add[0]) : `${added} months`}`);
+            (d.full || []).forEach((f) => msgs.push(`${monthName(f.month)} was just taken by ${f.by.join(', ')}`));
+        }
+        showToast(msgs.join('. ') + '.');
     } catch (err) {
         mstate.signups = before;
         showToast(`⚠️ ${err.message}`);
@@ -183,6 +314,6 @@ function shareNeeded() {
             ? `${m.icon} ${m.name}: needed${m.slots > 1 ? ` (${left} more)` : ''}${people.length ? ` – ${people.map((p) => firstName(p.name)).join(', ')}` : ''}`
             : `✅ ${m.name}: ${people.map((p) => firstName(p.name)).join(', ')}`;
     });
-    const text = `🪔 Satsang materials for ${fmt}\n\n${lines.join('\n')}\n\nSign up here: ${location.href.split('#')[0]}`;
+    const text = `🪔 Satsang materials for ${fmt}\n\n${lines.join('\n')}\n\nSign up here (one month or the whole year): ${location.href.split('#')[0]}`;
     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank', 'noopener');
 }
