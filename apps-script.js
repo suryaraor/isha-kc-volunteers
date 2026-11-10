@@ -20,17 +20,20 @@ const STATUS_HEADERS = ['Month', 'Satsang Date', 'Volunteer ID', 'Volunteer Name
 // or set Active to "no" to hide one. Keep the Key column unchanged once people sign up.
 const MATERIALS_SHEET = 'Materials';
 const MATERIAL_SIGNUPS_SHEET = 'Material Signups';
-const MATERIALS_HEADERS = ['Key', 'Item', 'Icon', 'People Needed', 'Active'];
+const MATERIALS_HEADERS = ['Key', 'Item', 'Icon', 'People Needed', 'Active', 'Details'];
 const MATERIALS_SEED = [
-  ['whitesheets', 'White sheets', '🛏️', 1, 'yes'],
-  ['flowers', 'Flowers', '🌸', 1, 'yes'],
-  ['oil', 'Oil', '🪔', 1, 'yes'],
-  ['bin', 'Satsang bin', '🧺', 1, 'yes'],
-  ['picture', 'Sadhguru picture', '🖼️', 1, 'yes'],
-  ['chair', 'Sadhguru chair', '🪑', 1, 'yes'],
-  ['speaker', 'Speaker', '🔊', 1, 'yes'],
-  ['yellowbox', 'Yellow box', '📦', 1, 'yes'],
-  ['projector', 'Projector and screen', '📽️', 1, 'yes']
+  ['whitesheets', 'White sheets', '🛏️', 1, 'yes', ''],
+  ['flowers', 'Flowers', '🌸', 1, 'yes', ''],
+  ['oil', 'Oil', '🪔', 1, 'yes', ''],
+  ['bin', 'Satsang bin', '🧺', 1, 'yes', ''],
+  ['picture', 'Sadhguru picture', '🖼️', 1, 'yes', ''],
+  ['chair', 'Sadhguru chair', '🪑', 1, 'yes', ''],
+  ['speaker', 'Speaker', '🔊', 1, 'yes', ''],
+  ['yellowbox', 'Yellow box', '📦', 1, 'yes', ''],
+  ['projector', 'Projector and screen', '📽️', 1, 'yes', ''],
+  ['flowervase', 'Flower vase', '🏺', 1, 'yes', ''],
+  ['paper', 'Paper material', '📋', 1, 'yes', 'Clipboard, white sheets, MoM, IE flyers'],
+  ['smallbasket', 'Small basket', '🧺', 1, 'yes', '']
 ];
 const MATERIAL_SIGNUP_HEADERS = ['Month', 'Satsang Date', 'Item Key', 'Item', 'Volunteer ID', 'Volunteer Name', 'Signed Up At'];
 
@@ -288,7 +291,7 @@ function readMaterials() {
     const r = data[i];
     const key = String(r[0]).trim();
     if (!key || String(r[4]).trim().toLowerCase() === 'no') continue;
-    items.push({ key: key, name: String(r[1]).trim() || key, icon: String(r[2]).trim() || '📦', slots: Math.max(1, Number(r[3]) || 1) });
+    items.push({ key: key, name: String(r[1]).trim() || key, icon: String(r[2]).trim() || '📦', slots: Math.max(1, Number(r[3]) || 1), details: String(r[5] || '').trim() });
   }
   return items;
 }

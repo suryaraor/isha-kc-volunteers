@@ -77,10 +77,11 @@ async function init() {
 // items that have no icon here, and the emoji below go into the WhatsApp share text.
 const DEFAULT_ICONS = {
     whitesheets: 'folded-sheets', flowers: 'flower-2', oil: 'droplet', bin: 'shopping-basket', picture: 'image',
-    chair: 'armchair', speaker: 'speaker', yellowbox: 'package', carpets: 'rectangle-horizontal', projector: 'projector'
+    chair: 'armchair', speaker: 'speaker', yellowbox: 'package', carpets: 'rectangle-horizontal', projector: 'projector',
+    flowervase: 'flower-vase', paper: 'clipboard-list', smallbasket: 'small-basket'
 };
 const SHARE_EMOJI = {
-    whitesheets: '🛏️', flowers: '🌸', oil: '🪔', bin: '🧺', picture: '🖼️', chair: '🪑', speaker: '🔊', yellowbox: '📦', carpets: '🟥', projector: '📽️'
+    whitesheets: '🛏️', flowers: '🌸', oil: '🪔', bin: '🧺', picture: '🖼️', chair: '🪑', speaker: '🔊', yellowbox: '📦', carpets: '🟥', projector: '📽️', flowervase: '🏺', paper: '📋', smallbasket: '🧺'
 };
 
 function applyMaterials(d) {
@@ -196,7 +197,9 @@ function renderMaterials() {
         const status = mine ? '✓ You' : full ? '✓ Covered' : m.slots > 1 ? `Need ${m.slots - people.length} more` : 'Needed';
         const mi = el('span', 'mat-icon');
         mi.appendChild(itemIcon(m));
-        tile.append(mi, el('span', 'mat-name', m.name), el('span', 'mat-status', status));
+        tile.append(mi, el('span', 'mat-name', m.name));
+        if (m.details) tile.appendChild(el('span', 'mat-details', m.details));
+        tile.appendChild(el('span', 'mat-status', status));
         // Names under the badge, leaving out "You" when the badge already says it
         const others = people.filter((p) => p.id !== mstate.me?.id).map((p) => firstName(p.name));
         if (others.length) tile.appendChild(el('span', 'mat-who', (mine ? 'Also: ' : '') + others.join(', ')));
@@ -248,6 +251,7 @@ function openSheet(m) {
     if (!sheet.picked.size && takenBy(m.key).length < m.slots) sheet.picked.add(CYCLE.key);
     $('sheetIcon').replaceChildren(itemIcon(m));
     $('sheetTitle').textContent = m.name;
+    $('sheetSub').textContent = m.details ? `Includes: ${m.details}. Which Satsangs can you bring it to?` : 'Which Satsangs can you bring it to?';
     renderSheet();
     show('sheetBackdrop', true);
     show('monthSheet', true);
@@ -372,7 +376,7 @@ function shareNeeded() {
         const people = takenBy(m.key);
         const left = m.slots - people.length;
         return left > 0
-            ? `${m.emoji} ${m.name}: needed${m.slots > 1 ? ` (${left} more)` : ''}${people.length ? ` – ${people.map((p) => firstName(p.name)).join(', ')}` : ''}`
+            ? `${m.emoji} ${m.name}${m.details ? ` (${m.details})` : ''}: needed${m.slots > 1 ? ` (${left} more)` : ''}${people.length ? ` – ${people.map((p) => firstName(p.name)).join(', ')}` : ''}`
             : `✅ ${m.name}: ${people.map((p) => firstName(p.name)).join(', ')}`;
     });
     const text = `🪔 Satsang materials for ${fmt}\n\n${lines.join('\n')}\n\nSign up here (one month or the whole year): ${location.href.split('#')[0]}`;

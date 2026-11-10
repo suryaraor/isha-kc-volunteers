@@ -1,8 +1,12 @@
 // Lucide icons (https://lucide.dev, ISC licence) used by the outreach and material-signup pages.
 // icon(name, cls) returns an <svg> element; the same symbols can be used in static HTML with
 // <svg class="ic"><use href="#i-NAME"/></svg>. Add more by pasting an icon's inner SVG shapes below.
-// 'folded-sheets' is not from Lucide: it is drawn in the same style (24px grid, rounded strokes).
+// 'folded-sheets', 'flower-vase' and 'small-basket' are not from Lucide: they are drawn in the same style
+// (24px grid, rounded strokes).
 const ICON_SHAPES = {
+    'clipboard-list': '<rect width="8" height="4" x="8" y="2" rx="1" ry="1"/> <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/> <path d="M12 11h4"/> <path d="M12 16h4"/> <path d="M8 11h.01"/> <path d="M8 16h.01"/>',
+    'flower-vase': '<path d="M9.5 10h5"/><path d="M9.5 10c0 2.5-3 3.7-3 7a3 3 0 0 0 3 3h5a3 3 0 0 0 3-3c0-3.3-3-4.5-3-7"/><path d="M12 10V5"/><path d="M10.5 10 8 6.5"/><path d="M13.5 10 16 6.5"/><circle cx="12" cy="3.8" r="1.3"/><circle cx="7.3" cy="5.4" r="1.2"/><circle cx="16.7" cy="5.4" r="1.2"/>',
+    'small-basket': '<path d="M7 10a5 5 0 0 1 10 0"/><path d="M3.5 10h17l-1.6 8.3a2 2 0 0 1-2 1.7H7.1a2 2 0 0 1-2-1.7z"/><path d="M9 10l.8 10"/><path d="M15 10l-.8 10"/><path d="M4.3 14.5h15.4"/>',
     'projector': '<path d="M5 7 3 5"/> <path d="M9 6V3"/> <path d="m13 7 2-2"/> <circle cx="9" cy="13" r="3"/> <path d="M11.83 12H20a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h2.17"/> <path d="M16 16h2"/>',
     'folded-sheets': '<rect x="2.5" y="15" width="19" height="5" rx="1.5"/><rect x="3.5" y="10" width="17" height="5" rx="1.5"/><rect x="4.5" y="5" width="15" height="5" rx="1.5"/><path d="M7 15v5"/><path d="M8 10v5"/><path d="M9 5v5"/>',
     'bed-double': '<path d="M2 20v-8a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v8"/> <path d="M4 10V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v4"/> <path d="M12 4v6"/> <path d="M2 18h20"/>',
