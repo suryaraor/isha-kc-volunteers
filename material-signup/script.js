@@ -138,10 +138,16 @@ function firstName(name) {
     return String(name).split(/\s+/).slice(0, 2).join(' ');
 }
 
+// Still-needed items first, then yours, then ones others have covered (sheet order within each group)
+function sortedItems() {
+    const rank = (m) => (isMine(m.key) ? 1 : takenBy(m.key).length < m.slots ? 0 : 2);
+    return mstate.items.map((m, i) => ({ m, i })).sort((a, b) => rank(a.m) - rank(b.m) || a.i - b.i).map((x) => x.m);
+}
+
 function renderMaterials() {
     const grid = $('materialGrid');
     grid.replaceChildren();
-    mstate.items.forEach((m) => {
+    sortedItems().forEach((m) => {
         const people = takenBy(m.key);
         const mine = isMine(m.key);
         const full = people.length >= m.slots;
@@ -307,7 +313,7 @@ async function saveSheet() {
 
 function shareNeeded() {
     const fmt = CYCLE.target.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
-    const lines = mstate.items.map((m) => {
+    const lines = sortedItems().map((m) => {
         const people = takenBy(m.key);
         const left = m.slots - people.length;
         return left > 0
