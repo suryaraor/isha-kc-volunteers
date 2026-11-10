@@ -32,7 +32,7 @@ const MATERIALS_SEED = [
   ['yellowbox', 'Yellow box', '📦', 1, 'yes', ''],
   ['projector', 'Projector and screen', '📽️', 1, 'yes', ''],
   ['flowervase', 'Flower vase', '🏺', 1, 'yes', ''],
-  ['paper', 'Paper material', '📋', 1, 'yes', 'Clipboard, white sheets, MoM, IE flyers'],
+  ['paper', 'Paper material', '📋', 1, 'yes', 'Clipboard, white sheets, Miracle of Mind app, IE flyers'],
   ['smallbasket', 'Small basket', '🧺', 1, 'yes', '']
 ];
 const MATERIAL_SIGNUP_HEADERS = ['Month', 'Satsang Date', 'Item Key', 'Item', 'Volunteer ID', 'Volunteer Name', 'Signed Up At'];
