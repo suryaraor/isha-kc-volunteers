@@ -11,27 +11,27 @@ let state = {
 
 // Monthly check-in questions. Values must match STATUS_FIELDS in apps-script.js.
 const QUESTIONS = [
-    { key: 'reached', icon: '🤝', title: 'Reached them?', options: [
-        { value: 'Call', icon: '📞', label: 'Call' },
-        { value: 'WhatsApp', icon: '💬', label: 'WhatsApp' },
-        { value: 'Text', icon: '✉️', label: 'Text' }
+    { key: 'reached', icon: 'handshake', title: 'Reached them?', options: [
+        { value: 'Call', icon: 'phone', label: 'Call' },
+        { value: 'WhatsApp', icon: 'message-circle', label: 'WhatsApp' },
+        { value: 'Text', icon: 'message-square', label: 'Text' }
     ] },
-    { key: 'shambhavi', icon: '🧘', title: 'Their Shambhavi?', options: [
-        { value: 'Daily', icon: '🌞', label: 'Daily' },
-        { value: '3-5 times', icon: '🌤️', label: '3-5 times' },
-        { value: 'Once', icon: '🌥️', label: 'Once' },
-        { value: 'Lost in touch', icon: '🌧️', label: 'Lost touch' }
+    { key: 'shambhavi', icon: 'sparkles', title: 'Their Shambhavi?', options: [
+        { value: 'Daily', icon: 'sun', label: 'Daily' },
+        { value: '3-5 times', icon: 'cloud-sun', label: '3-5 times' },
+        { value: 'Once', icon: 'cloud', label: 'Once' },
+        { value: 'Lost in touch', icon: 'cloud-rain', label: 'Lost touch' }
     ] },
-    { key: 'satsang', icon: '🪔', title: 'Coming for Satsang?', options: [
-        { value: 'Yes, I will be there', icon: '✅', label: "I'll be there" },
-        { value: 'Not this time', icon: '🙅', label: 'Not this time' },
-        { value: 'Maybe in next 3 months', icon: '⏳', label: 'In 3 months' },
-        { value: 'Maybe in next 6 months', icon: '🗓️', label: 'In 6 months' }
+    { key: 'satsang', icon: 'flame', title: 'Coming for Satsang?', options: [
+        { value: 'Yes, I will be there', icon: 'circle-check', label: "I'll be there" },
+        { value: 'Not this time', icon: 'circle-x', label: 'Not this time' },
+        { value: 'Maybe in next 3 months', icon: 'hourglass', label: 'In 3 months' },
+        { value: 'Maybe in next 6 months', icon: 'calendar', label: 'In 6 months' }
     ] },
-    { key: 'personal', icon: '💛', title: 'Personal life?', options: [
-        { value: 'Doing great', icon: '😄', label: 'Doing great' },
-        { value: 'Going fine', icon: '🙂', label: 'Going fine' },
-        { value: 'Struggling', icon: '😟', label: 'Struggling' }
+    { key: 'personal', icon: 'heart', title: 'Personal life?', options: [
+        { value: 'Doing great', icon: 'smile', label: 'Doing great' },
+        { value: 'Going fine', icon: 'meh', label: 'Going fine' },
+        { value: 'Struggling', icon: 'frown', label: 'Struggling' }
     ] }
 ];
 
@@ -188,7 +188,9 @@ function volunteerCard(v) {
     const info = el('div', 'info');
     info.appendChild(el('span', 'name', v.name));
     const done = el('div', 'done-icons');
-    summary.append(info, done, el('span', 'chev', '›'));
+    const chev = el('span', 'chev');
+    chev.appendChild(icon('chevron-right'));
+    summary.append(info, done, chev);
     card.appendChild(summary);
 
     const body = el('div', 'vcard-body');
@@ -196,15 +198,17 @@ function volunteerCard(v) {
     if (wa) {
         const digits = '+' + wa;
         const contact = el('div', 'contact');
-        [['📞', 'Call', `tel:${digits}`], ['💬', 'WhatsApp', `https://wa.me/${wa}`], ['✉️', 'Text', `sms:${digits}`]]
-            .forEach(([icon, label, href]) => {
+        [['phone', 'Call', `tel:${digits}`], ['message-circle', 'WhatsApp', `https://wa.me/${wa}`], ['message-square', 'Text', `sms:${digits}`]]
+            .forEach(([iconName, label, href]) => {
                 const a = el('a', 'contact-btn');
                 a.href = href;
                 if (href.startsWith('http')) {
                     a.target = '_blank';
                     a.rel = 'noopener';
                 }
-                a.append(el('span', 'ci', icon), el('span', '', label));
+                const ci = el('span', 'ci');
+                ci.appendChild(icon(iconName));
+                a.append(ci, el('span', '', label));
                 contact.appendChild(a);
             });
         body.append(el('div', 'phone-line', v.phone), contact);
@@ -212,13 +216,17 @@ function volunteerCard(v) {
 
     QUESTIONS.forEach((q) => {
         const block = el('div', 'q');
-        block.appendChild(el('div', 'q-title', `${q.icon} ${q.title}`));
+        const title = el('div', 'q-title');
+        title.append(icon(q.icon), el('span', '', q.title));
+        block.appendChild(title);
         const grid = el('div', `opts n${q.options.length}`);
         q.options.forEach((o) => {
             const b = el('button', 'opt');
             b.type = 'button';
             b.setAttribute('aria-pressed', v.status[q.key] === o.value);
-            b.append(el('span', 'opt-icon', o.icon), el('span', 'opt-label', o.label));
+            const oi = el('span', 'opt-icon');
+            oi.appendChild(icon(o.icon));
+            b.append(oi, el('span', 'opt-label', o.label));
             b.addEventListener('click', () => saveAnswer(v, q, o.value, grid, refreshDone));
             grid.appendChild(b);
         });
@@ -239,7 +247,8 @@ function volunteerCard(v) {
         done.replaceChildren();
         QUESTIONS.forEach((q) => {
             const opt = q.options.find((o) => o.value === v.status[q.key]);
-            const dot = el('span', opt ? 'di on' : 'di', opt ? opt.icon : '');
+            const dot = el('span', opt ? 'di on' : 'di');
+            if (opt) dot.appendChild(icon(opt.icon));
             dot.title = `${q.title} ${opt ? opt.label : 'not yet'}`;
             done.appendChild(dot);
         });
@@ -289,7 +298,7 @@ async function saveAnswer(v, q, value, grid, refreshDone) {
             paint();
             grid.classList.remove('saving');
         }
-        showToast(`⚠️ Couldn't save for ${v.name}: ${err.message}`);
+        showToast(`Couldn't save for ${v.name}: ${err.message}`);
     }
 }
 

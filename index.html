@@ -4,7 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Isha KC Volunteer Outreach</title>
-    <link rel="stylesheet" href="style.css?v=4">
+    <meta name="theme-color" content="#28231e">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Trirong:wght@500;600;700&amp;display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css?v=8">
 </head>
 <body>
     <div class="container">
@@ -22,7 +26,7 @@
             <div class="cycle-top">
                 <div>
                     <div class="cycle-month" id="cycleMonth"></div>
-                    <div class="cycle-target">🎯 Satsang: <strong id="cycleTarget"></strong></div>
+                    <div class="cycle-target"><svg class="ic"><use href="#i-target"/></svg> Satsang: <strong id="cycleTarget"></strong></div>
                 </div>
                 <div class="cycle-left"><span id="cycleDays">0</span><small id="cycleDaysLabel">days left</small></div>
             </div>
@@ -30,7 +34,7 @@
                 <div class="progress-fill" id="cycleFill"></div>
             </div>
             <div class="cycle-range"><span id="cycleStart"></span><span id="cycleEnd"></span></div>
-            <a class="cycle-link" href="material-signup/">🪔 Sign up to bring Satsang materials ›</a>
+            <a class="cycle-link" href="material-signup/"><svg class="ic"><use href="#i-hand-heart"/></svg> <span>Sign up to bring Satsang materials</span> <svg class="ic"><use href="#i-chevron-right"/></svg></a>
         </div>
 
         <div id="loadingIndicator" class="loading"><p>Loading data...</p></div>
@@ -62,11 +66,11 @@
                 <p>Tap a name to open it, then tap the icons to record this month's check-in.</p>
             </div>
             <div id="mineList" class="results-list"></div>
-            <div id="noMine" class="no-results" style="display: none;"><p>You haven't picked anyone yet. Tap <strong>➕ Add volunteers</strong> below.</p></div>
+            <div id="noMine" class="no-results" style="display: none;"><p>You haven't picked anyone yet. Tap <strong>Add volunteers</strong> below.</p></div>
 
             <div class="add-wrap">
                 <button id="toggleAddBtn" class="add-btn" aria-expanded="false">
-                    <span class="add-icon">➕</span> Add volunteers <span class="pill light" id="availCount">0</span>
+                    <span class="add-icon"><svg class="ic"><use href="#i-circle-plus"/></svg></span> Add volunteers <span class="pill light" id="availCount">0</span>
                 </button>
             </div>
 
@@ -75,7 +79,7 @@
                     <p>Tap people to select them, then confirm.</p>
                 </div>
                 <div class="search-section">
-                    <input type="text" id="pickSearch" class="search-input" placeholder="🔍 Search available volunteers..." autocomplete="off">
+                    <input type="text" id="pickSearch" class="search-input" placeholder="Search available volunteers..." autocomplete="off">
                 </div>
                 <div id="availList" class="results-list"></div>
                 <div id="noAvail" class="no-results" style="display: none;"><p>No available volunteers.</p></div>
@@ -95,7 +99,8 @@
         </section>
     </div>
 
-    <script src="common.js?v=4"></script>
-    <script src="script.js?v=5"></script>
+    <script src="icons.js?v=1"></script>
+    <script src="common.js?v=5"></script>
+    <script src="script.js?v=6"></script>
 </body>
 </html>

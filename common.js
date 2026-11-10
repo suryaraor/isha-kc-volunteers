@@ -107,7 +107,7 @@ function renderCycle() {
     const fmt = (d, o) => d.toLocaleDateString(undefined, o);
     $('cycleMonth').textContent = c.label;
     $('cycleTarget').textContent = fmt(c.target, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
-    $('cycleDays').textContent = c.daysLeft === 0 ? '🎉' : c.daysLeft;
+    $('cycleDays').textContent = c.daysLeft;
     $('cycleDaysLabel').textContent = c.daysLeft === 0 ? 'Satsang today' : (c.daysLeft === 1 ? 'day left' : 'days left');
     const pct = Math.min(100, Math.max(0, ((c.total - c.daysLeft) / c.total) * 100));
     $('cycleFill').style.width = `${pct}%`;

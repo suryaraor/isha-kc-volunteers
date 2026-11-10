@@ -4,13 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Satsang Materials Signup</title>
-    <link rel="stylesheet" href="../style.css?v=4">
-    <link rel="stylesheet" href="style.css?v=3">
+    <meta name="theme-color" content="#28231e">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Trirong:wght@500;600;700&amp;display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../style.css?v=8">
+    <link rel="stylesheet" href="style.css?v=5">
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>🪔 Satsang Materials</h1>
+            <h1><svg class="ic"><use href="#i-flame"/></svg> Satsang Materials</h1>
             <div class="count-box">
                 <div class="count-label">Still needed</div>
                 <div class="count-number" id="neededCount">–</div>
@@ -23,7 +27,7 @@
             <div class="cycle-top">
                 <div>
                     <div class="cycle-month" id="cycleMonth"></div>
-                    <div class="cycle-target">🎯 Satsang: <strong id="cycleTarget"></strong></div>
+                    <div class="cycle-target"><svg class="ic"><use href="#i-target"/></svg> Satsang: <strong id="cycleTarget"></strong></div>
                 </div>
                 <div class="cycle-left"><span id="cycleDays">0</span><small id="cycleDaysLabel">days left</small></div>
             </div>
@@ -41,7 +45,7 @@
         <section id="stepMaterials" style="display: none;">
             <!-- Not identified yet: one simple box, names appear as you type -->
             <div id="whoBox" class="who-box">
-                <input type="text" id="identifySearch" class="who-input" placeholder="🔍 Type your name to sign up" autocomplete="off" autocapitalize="words" enterkeyhint="search">
+                <input type="text" id="identifySearch" class="who-input" placeholder="Type your name to sign up" autocomplete="off" autocapitalize="words" enterkeyhint="search">
                 <div id="activeList" class="who-results" style="display: none;"></div>
                 <div id="noActive" class="who-none" style="display: none;">No matching name</div>
             </div>
@@ -58,7 +62,7 @@
             <div id="materialGrid" class="mat-grid"></div>
 
             <div class="mat-actions">
-                <button id="shareBtn" class="share-btn">💬 Share what's still needed on WhatsApp</button>
+                <button id="shareBtn" class="share-btn"><svg class="ic"><use href="#i-message-circle"/></svg> Share what's still needed on WhatsApp</button>
                 <a href="../" class="back-link">‹ Back to volunteer outreach</a>
             </div>
         </section>
@@ -82,18 +86,19 @@
                 <h3 id="sheetTitle"></h3>
                 <p>Which Satsangs can you bring it to?</p>
             </div>
-            <button id="sheetClose" class="sheet-close" aria-label="Close">✕</button>
+            <button id="sheetClose" class="sheet-close" aria-label="Close"><svg class="ic"><use href="#i-x"/></svg></button>
         </div>
         <div class="quick-picks">
-            <button id="pickThis" class="qp" type="button"><span>📅</span>This month</button>
-            <button id="pickYear" class="qp" type="button"><span>🔁</span>Whole year</button>
-            <button id="pickNone" class="qp" type="button"><span>↺</span>Clear</button>
+            <button id="pickThis" class="qp" type="button"><span><svg class="ic"><use href="#i-calendar"/></svg></span>This month</button>
+            <button id="pickYear" class="qp" type="button"><span><svg class="ic"><use href="#i-repeat"/></svg></span>Whole year</button>
+            <button id="pickNone" class="qp" type="button"><span><svg class="ic"><use href="#i-rotate-ccw"/></svg></span>Clear</button>
         </div>
         <div id="monthGrid" class="month-grid"></div>
         <button id="sheetSave" class="primary-btn sheet-save" type="button">Save</button>
     </div>
 
-    <script src="../common.js?v=4"></script>
-    <script src="script.js?v=6"></script>
+    <script src="../icons.js?v=1"></script>
+    <script src="../common.js?v=5"></script>
+    <script src="script.js?v=7"></script>
 </body>
 </html>

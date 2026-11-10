@@ -72,14 +72,32 @@ async function init() {
     show('loadingIndicator', false);
 }
 
-// Icons to use when the sheet still has the generic 📦 for an item (so it isn't confused with
-// the Yellow box). An icon typed into the Materials tab always wins over these.
-const ICON_FALLBACKS = { carpets: '🟥' };
+// Each item gets a Lucide icon by its key. To change one, type a Lucide icon name from icons.js
+// (e.g. "flower-2") in that item's Icon cell in the Materials tab. An emoji there still works for
+// items that have no icon here, and the emoji below go into the WhatsApp share text.
+const DEFAULT_ICONS = {
+    whitesheets: 'bed-double', flowers: 'flower-2', oil: 'droplet', bin: 'shopping-basket', picture: 'image',
+    chair: 'armchair', speaker: 'speaker', yellowbox: 'package', carpets: 'rectangle-horizontal'
+};
+const SHARE_EMOJI = {
+    whitesheets: '🛏️', flowers: '🌸', oil: '🪔', bin: '🧺', picture: '🖼️', chair: '🪑', speaker: '🔊', yellowbox: '📦', carpets: '🟥'
+};
 
 function applyMaterials(d) {
-    mstate.items = d.items.map((m) => (m.icon === '📦' && ICON_FALLBACKS[m.key] ? { ...m, icon: ICON_FALLBACKS[m.key] } : m));
+    mstate.items = d.items.map((m) => {
+        const raw = String(m.icon || '').trim();
+        const named = hasIcon(raw) ? raw : '';
+        // Carpets used to be saved with the generic box emoji, which is the Yellow box's: ignore that one
+        const ownEmoji = !named && raw && !(raw === '📦' && SHARE_EMOJI[m.key]) ? raw : '';
+        return { ...m, iconName: named || DEFAULT_ICONS[m.key] || '', emoji: ownEmoji || SHARE_EMOJI[m.key] || '•' };
+    });
     // Older backend versions don't send a month; treat those rows as this month
     mstate.signups = d.signups.map((s) => ({ ...s, month: s.month || CYCLE.key }));
+}
+
+// An item's icon as an element: its Lucide icon, or its emoji when it has none
+function itemIcon(m, cls) {
+    return m.iconName ? icon(m.iconName, cls) : el('span', 'emo', m.emoji);
 }
 
 async function loadMaterials() {
@@ -176,15 +194,21 @@ function renderMaterials() {
         tile.setAttribute('aria-pressed', mine);
 
         const status = mine ? '✓ You' : full ? '✓ Covered' : m.slots > 1 ? `Need ${m.slots - people.length} more` : 'Needed';
-        tile.append(el('span', 'mat-icon', m.icon), el('span', 'mat-name', m.name), el('span', 'mat-status', status));
+        const mi = el('span', 'mat-icon');
+        mi.appendChild(itemIcon(m));
+        tile.append(mi, el('span', 'mat-name', m.name), el('span', 'mat-status', status));
         // Names under the badge, leaving out "You" when the badge already says it
         const others = people.filter((p) => p.id !== mstate.me?.id).map((p) => firstName(p.name));
         if (others.length) tile.appendChild(el('span', 'mat-who', (mine ? 'Also: ' : '') + others.join(', ')));
-        if (ahead) tile.appendChild(el('span', 'mat-ahead', `🔁 +${ahead} more month${ahead === 1 ? '' : 's'}`));
+        if (ahead) {
+            const more = el('span', 'mat-ahead');
+            more.append(icon('repeat'), `+${ahead} more month${ahead === 1 ? '' : 's'}`);
+            tile.appendChild(more);
+        }
         tile.setAttribute('aria-label', `${m.name}: ${status}${others.length ? `, ${others.join(', ')}` : ''}${ahead ? `, plus ${ahead} more months` : ''}`);
         tile.addEventListener('click', () => {
             if (mstate.me) return openSheet(m);
-            showToast('👆 Type your name first to sign up.');
+            showToast('Type your name first to sign up.');
             $('identifySearch').scrollIntoView({ behavior: 'smooth', block: 'center' });
             $('identifySearch').focus();
         });
@@ -195,12 +219,21 @@ function renderMaterials() {
     const aheadItems = mstate.items
         .map((m) => ({ m, n: myMonths(m.key).filter((k) => k !== CYCLE.key).length }))
         .filter((x) => x.n);
-    const lines = [];
-    if (mineItems.length) lines.push(`🙏 This Satsang you're bringing: ${mineItems.map((m) => `${m.icon} ${m.name}`).join(', ')}`);
-    if (aheadItems.length) lines.push(`🔁 Coming months: ${aheadItems.map((x) => `${x.m.icon} ${x.m.name} ×${x.n}`).join(', ')}`);
     const box = $('mySummary');
-    box.replaceChildren(...lines.map((l) => el('div', '', l)));
-    show('mySummary', lines.length > 0);
+    box.replaceChildren();
+    const addRow = (iconName, label, entries) => {
+        const row = el('div', 'sum-row');
+        row.append(icon(iconName, 'sum-ic'), el('span', 'sum-label', label));
+        entries.forEach(({ m, n }) => {
+            const chip = el('span', 'sum-item');
+            chip.append(itemIcon(m), el('span', '', n ? `${m.name} ×${n}` : m.name));
+            row.appendChild(chip);
+        });
+        box.appendChild(row);
+    };
+    if (mineItems.length) addRow('heart-handshake', "This Satsang you're bringing:", mineItems.map((m) => ({ m })));
+    if (aheadItems.length) addRow('repeat', 'Coming months:', aheadItems);
+    show('mySummary', box.children.length > 0);
     renderCounts();
 }
 
@@ -213,7 +246,7 @@ function openSheet(m) {
     sheet.picked = new Set(myMonths(m.key));
     // First tap on an open item: pre-select this month so one more tap on Save is enough
     if (!sheet.picked.size && takenBy(m.key).length < m.slots) sheet.picked.add(CYCLE.key);
-    $('sheetIcon').textContent = m.icon;
+    $('sheetIcon').replaceChildren(itemIcon(m));
     $('sheetTitle').textContent = m.name;
     renderSheet();
     show('sheetBackdrop', true);
@@ -320,13 +353,13 @@ async function saveSheet() {
             const d = await api({ action: 'materialSignup', activeId: mstate.me.id, months: add.join(','), key: m.key });
             applyMaterials(d);
             const added = d.added ? d.added.length : add.length;
-            if (added) msgs.unshift(`🙏 Thank you! ${m.icon} ${m.name} for ${added === 1 ? monthName(add[0]) : `${added} months`}`);
+            if (added) msgs.unshift(`Thank you! ${m.name} for ${added === 1 ? monthName(add[0]) : `${added} months`}`);
             (d.full || []).forEach((f) => msgs.push(`${monthName(f.month)} was just taken by ${f.by.join(', ')}`));
         }
         showToast(msgs.join('. ') + '.');
     } catch (err) {
         mstate.signups = before;
-        showToast(`⚠️ ${err.message}`);
+        showToast(err.message);
         refresh();
     }
     mstate.busy.delete(m.key);
@@ -339,7 +372,7 @@ function shareNeeded() {
         const people = takenBy(m.key);
         const left = m.slots - people.length;
         return left > 0
-            ? `${m.icon} ${m.name}: needed${m.slots > 1 ? ` (${left} more)` : ''}${people.length ? ` – ${people.map((p) => firstName(p.name)).join(', ')}` : ''}`
+            ? `${m.emoji} ${m.name}: needed${m.slots > 1 ? ` (${left} more)` : ''}${people.length ? ` – ${people.map((p) => firstName(p.name)).join(', ')}` : ''}`
             : `✅ ${m.name}: ${people.map((p) => firstName(p.name)).join(', ')}`;
     });
     const text = `🪔 Satsang materials for ${fmt}\n\n${lines.join('\n')}\n\nSign up here (one month or the whole year): ${location.href.split('#')[0]}`;
