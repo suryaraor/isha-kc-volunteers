@@ -2,7 +2,7 @@
 
 Static web app (HTML/CSS/JS) with a Google Sheet as the backend, via a Google Apps Script web app. Same pattern as the check-in app.
 
-**Flow:** an active volunteer opens the page, picks their name, then taps any number of inactive volunteers and confirms. Those people are tied to them and disappear from everyone else's list. Phone numbers never leave the sheet; the page only receives names.
+**Flow:** an active volunteer opens the page, picks their name, then taps any number of inactive volunteers and confirms. Those people are tied to them and disappear from everyone else's list. The pick list only receives names; phone numbers are sent only for the volunteers already assigned to you, shown under "Your volunteers" as WhatsApp links.
 
 ## Setup
 

@@ -146,7 +146,9 @@ function renderActive() {
     const q = normalize($('identifySearch').value);
     const list = $('activeList');
     list.replaceChildren();
-    const matches = state.active.filter((a) => normalize(a.name).includes(q));
+    const matches = state.active
+        .filter((a) => normalize(a.name).includes(q))
+        .sort((a, b) => (b.count || 0) - (a.count || 0) || a.name.localeCompare(b.name));
     matches.forEach((a) => {
         const item = document.createElement('div');
         item.className = 'result-item';
@@ -181,6 +183,13 @@ async function chooseMe(a) {
 }
 
 // ---------- Step 2 ----------
+// wa.me wants the full international number as digits only; assume US (+1) for bare 10-digit numbers
+function whatsappNumber(phone) {
+    const digits = String(phone || '').replace(/\D/g, '');
+    if (digits.length === 10) return '1' + digits;
+    return digits.length >= 11 ? digits : '';
+}
+
 function renderMine() {
     const list = $('mineList');
     list.replaceChildren();
@@ -191,11 +200,25 @@ function renderMine() {
         const name = document.createElement('span');
         name.className = 'name';
         name.textContent = v.name;
+        const info = document.createElement('div');
+        info.className = 'info';
+        info.appendChild(name);
+        const wa = whatsappNumber(v.phone);
+        if (wa) {
+            const phone = document.createElement('a');
+            phone.className = 'phone';
+            phone.href = `https://wa.me/${wa}`;
+            phone.target = '_blank';
+            phone.rel = 'noopener';
+            phone.textContent = v.phone;
+            phone.title = 'Open in WhatsApp';
+            info.appendChild(phone);
+        }
         const btn = document.createElement('button');
         btn.className = 'link-btn danger';
         btn.textContent = 'Remove';
         btn.addEventListener('click', () => releaseOne(v, btn));
-        item.append(name, btn);
+        item.append(info, btn);
         list.appendChild(item);
     });
     show('noMine', state.mine.length === 0);

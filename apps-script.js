@@ -67,6 +67,7 @@ function readSheet() {
   const c = {
     id: col('ID'),
     name: col('Name'),
+    phone: headers.indexOf('phone'),
     active: col('Active Volunteer'),
     toId: col('Assigned To ID'),
     to: col('Assigned To'),
@@ -81,6 +82,7 @@ function readSheet() {
       row: i + 1,
       id: String(r[c.id]).trim(),
       name: name,
+      phone: c.phone === -1 ? '' : String(r[c.phone] || '').trim(),
       active: String(r[c.active]).trim().toLowerCase() === 'yes',
       assignedToId: String(r[c.toId] || '').trim()
     });
@@ -111,7 +113,7 @@ function getData() {
 function getMine(activeId) {
   const { rows } = readSheet();
   const mine = rows.filter(r => !r.active && r.assignedToId === String(activeId))
-    .map(r => ({ id: r.id, name: r.name }));
+    .map(r => ({ id: r.id, name: r.name, phone: r.phone }));
   return { success: true, mine: mine };
 }
 

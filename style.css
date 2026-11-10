@@ -86,6 +86,9 @@ body {
 .result-item .name { flex: 1; font-size: 16px; color: #333; }
 .result-item.selectable.selected { background: #e8ebff; border-color: #667eea; }
 .result-item.mine { cursor: default; background: #eaf7ef; }
+.result-item .info { flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.result-item .phone { font-size: 14px; color: #128c7e; text-decoration: none; align-self: flex-start; }
+.result-item .phone:hover { text-decoration: underline; }
 .result-item input[type="checkbox"] { width: 20px; height: 20px; accent-color: #667eea; }
 
 .badge { font-size: 12px; color: #667eea; background: #eef0ff; padding: 3px 10px; border-radius: 999px; }
