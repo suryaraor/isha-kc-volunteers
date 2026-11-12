@@ -12,8 +12,14 @@ const STATUS_FIELDS = {
   satsang: { header: 'Coming for Satsang', values: ['Not this time', 'Yes, I will be there', 'Maybe in next 3 months', 'Maybe in next 6 months'] },
   personal: { header: 'Personal Life', values: ['Doing great', 'Going fine', 'Struggling'] }
 };
+// Notes (free-form feedback) is the last column so sheets created before it keep their layout
 const STATUS_HEADERS = ['Month', 'Satsang Date', 'Volunteer ID', 'Volunteer Name', 'Assigned To ID', 'Assigned To']
-  .concat(Object.keys(STATUS_FIELDS).map(k => STATUS_FIELDS[k].header), ['Updated At']);
+  .concat(Object.keys(STATUS_FIELDS).map(k => STATUS_FIELDS[k].header), ['Updated At', 'Notes']);
+const STATUS_UPDATED_COL = STATUS_HEADERS.indexOf('Updated At') + 1;
+const STATUS_NOTES_COL = STATUS_HEADERS.indexOf('Notes') + 1;
+const NOTES_MAX = 1000;
+// Volunteers tab column added automatically the first time someone is marked out of town
+const OUT_OF_TOWN_HEADER = 'Out of Town';
 
 // Satsang material signups (material-signup/ page). Both tabs are created automatically.
 // Edit the Materials tab to rename items, change icons, set how many people each needs,
@@ -66,6 +72,9 @@ function doGet(e) {
       case 'release':
         result = withLock(() => release(p.activeId, splitIds(p.ids)));
         break;
+      case 'outOfTown':
+        result = withLock(() => markOutOfTown(p.activeId, p.id));
+        break;
       default:
         result = { success: false, error: 'Unknown action' };
     }
@@ -116,6 +125,7 @@ function readSheet() {
     id: col('ID'),
     name: col('Name'),
     phone: headers.indexOf('phone'),
+    away: headers.indexOf(OUT_OF_TOWN_HEADER.toLowerCase()),
     active: col('Active Volunteer'),
     toId: col('Assigned To ID'),
     to: col('Assigned To'),
@@ -132,10 +142,22 @@ function readSheet() {
       name: name,
       phone: c.phone === -1 ? '' : String(r[c.phone] || '').trim(),
       active: String(r[c.active]).trim().toLowerCase() === 'yes',
-      assignedToId: String(r[c.toId] || '').trim()
+      assignedToId: String(r[c.toId] || '').trim(),
+      // Out-of-town volunteers are no longer tracked: hidden from every list and count
+      away: c.away !== -1 && isYes(r[c.away])
     });
   }
   return { sheet, c, rows };
+}
+
+function isYes(v) {
+  const s = String(v || '').trim().toLowerCase();
+  return s !== '' && s !== 'no';
+}
+
+// Inactive volunteers we still track (not marked out of town)
+function tracked(r) {
+  return !r.active && !r.away;
 }
 
 // Public lists: names only (phone numbers are never sent to the browser)
@@ -143,11 +165,11 @@ function getData() {
   const { rows } = readSheet();
   const counts = {};
   rows.forEach(r => {
-    if (!r.active && r.assignedToId) counts[r.assignedToId] = (counts[r.assignedToId] || 0) + 1;
+    if (tracked(r) && r.assignedToId) counts[r.assignedToId] = (counts[r.assignedToId] || 0) + 1;
   });
   const active = rows.filter(r => r.active)
     .map(r => ({ id: r.id, name: r.name, count: counts[r.id] || 0 }));
-  const inactive = rows.filter(r => !r.active);
+  const inactive = rows.filter(tracked);
   const available = inactive.filter(r => !r.assignedToId).map(r => ({ id: r.id, name: r.name }));
   return {
     success: true,
@@ -161,7 +183,7 @@ function getData() {
 function getMine(activeId, month) {
   const { rows } = readSheet();
   const status = month ? readStatus(String(month)) : {};
-  const mine = rows.filter(r => !r.active && r.assignedToId === String(activeId))
+  const mine = rows.filter(r => tracked(r) && r.assignedToId === String(activeId))
     .map(r => ({ id: r.id, name: r.name, phone: r.phone, status: status[r.id] || {} }));
   return { success: true, mine: mine };
 }
@@ -175,6 +197,8 @@ function statusSheet(create) {
     sheet.getRange(1, 1, 1, STATUS_HEADERS.length).setValues([STATUS_HEADERS]).setFontWeight('bold');
     sheet.getRange('A:A').setNumberFormat('@'); // keep "2026-11" as text, not a date
     sheet.setFrozenRows(1);
+  } else if (sheet && create && String(sheet.getRange(1, STATUS_NOTES_COL).getValue()).trim() !== 'Notes') {
+    sheet.getRange(1, STATUS_NOTES_COL).setValue('Notes').setFontWeight('bold');
   }
   return sheet;
 }
@@ -198,6 +222,8 @@ function readStatus(month) {
     keys.forEach((k, j) => {
       if (r[6 + j] !== '') s[k] = String(r[6 + j]);
     });
+    const notes = r[STATUS_NOTES_COL - 1];
+    if (notes !== undefined && notes !== '') s.notes = String(notes);
     out[String(r[2]).trim()] = s;
   }
   return out;
@@ -205,14 +231,18 @@ function readStatus(month) {
 
 function setStatus(activeId, month, satsang, id, field, value) {
   if (!/^\d{4}-\d{2}$/.test(String(month))) return { success: false, error: 'Invalid month' };
+  const isNotes = field === 'notes';
   const def = STATUS_FIELDS[field];
-  if (!def) return { success: false, error: 'Unknown field' };
-  if (def.values.indexOf(value) === -1) return { success: false, error: 'Invalid value' };
+  if (!def && !isNotes) return { success: false, error: 'Unknown field' };
+  if (isNotes) {
+    value = String(value || '').trim().slice(0, NOTES_MAX);
+    if (/^[=+\-@]/.test(value)) value = "'" + value; // keep the sheet from treating it as a formula
+  } else if (def.values.indexOf(value) === -1) return { success: false, error: 'Invalid value' };
 
   const { rows } = readSheet();
   const me = rows.find(r => r.active && r.id === String(activeId));
   if (!me) return { success: false, error: 'Active volunteer not found' };
-  const v = rows.find(r => !r.active && r.id === String(id));
+  const v = rows.find(r => tracked(r) && r.id === String(id));
   if (!v || v.assignedToId !== me.id) return { success: false, error: 'This volunteer is not assigned to you' };
 
   const sheet = statusSheet(true);
@@ -228,8 +258,9 @@ function setStatus(activeId, month, satsang, id, field, value) {
 
   // Answers overwrite whatever was saved for this volunteer this month
   sheet.getRange(row, 1, 1, 6).setValues([[month, satsang || '', v.id, v.name, me.id, me.name]]);
-  sheet.getRange(row, 7 + Object.keys(STATUS_FIELDS).indexOf(field)).setValue(value);
-  sheet.getRange(row, STATUS_HEADERS.length).setValue(new Date());
+  const col = isNotes ? STATUS_NOTES_COL : 7 + Object.keys(STATUS_FIELDS).indexOf(field);
+  sheet.getRange(row, col).setValue(value);
+  sheet.getRange(row, STATUS_UPDATED_COL).setValue(new Date());
   SpreadsheetApp.flush();
   return { success: true };
 }
@@ -243,7 +274,7 @@ function claim(activeId, ids) {
   const taken = [];
   const now = new Date();
   ids.forEach(id => {
-    const t = rows.find(r => !r.active && r.id === id);
+    const t = rows.find(r => tracked(r) && r.id === id);
     if (!t) return;
     if (t.assignedToId) {
       taken.push({ id: t.id, name: t.name });
@@ -268,6 +299,22 @@ function release(activeId, ids) {
   });
   SpreadsheetApp.flush();
   return { success: true, released: released };
+}
+
+// Stop tracking a volunteer who has moved away. The assignment columns are kept so the sheet
+// still shows who they were with; clear the Out of Town cell to bring them back.
+function markOutOfTown(activeId, id) {
+  const { sheet, c, rows } = readSheet();
+  const t = rows.find(r => tracked(r) && r.id === String(id) && r.assignedToId === String(activeId));
+  if (!t) return { success: false, error: 'This volunteer is not assigned to you' };
+  let col = c.away;
+  if (col === -1) {
+    col = sheet.getLastColumn();
+    sheet.getRange(1, col + 1).setValue(OUT_OF_TOWN_HEADER).setFontWeight('bold');
+  }
+  sheet.getRange(t.row, col + 1).setValue('yes');
+  SpreadsheetApp.flush();
+  return { success: true, id: t.id, name: t.name };
 }
 
 // ---------- Satsang material signups (one row per person per item per Satsang month) ----------

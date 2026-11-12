@@ -10,6 +10,10 @@ The top of the page counts down to the next Satsang (2nd Saturday of the month).
 
 Under "Your volunteers", each person is a collapsible card with four icon questions: how you reached them, their Shambhavi practice, whether they're coming to Satsang, and how their personal life is going. Each tap saves right away to a `Status` tab, one row per volunteer per month (the tab is created automatically). Tapping a different answer overwrites that month's value. When a new month starts, the cards start out blank and the earlier months stay in the sheet.
 
+Each card also has an optional **Anything else to share?** box for free-form feedback. It saves a second or so after you stop typing (or when you leave the box) to a `Notes` column at the end of that month's `Status` row.
+
+If someone has moved away, tap **Moved out of town** at the bottom of their card (tap twice to confirm). This writes `yes` to an `Out of Town` column on the `Volunteers` tab (added automatically the first time). They are then hidden from the "Reached out" count, from your list and from the Add list, and no more check-ins are saved for them. Their assignment and past `Status` rows stay in the sheet. To bring someone back, clear their `Out of Town` cell.
+
 ## Satsang material signups
 
 Live at `https://suryaraor.github.io/isha-kc-volunteers/material-signup/` (also linked from the countdown on the outreach page).

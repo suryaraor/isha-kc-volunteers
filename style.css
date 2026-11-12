@@ -206,7 +206,17 @@ h1, h2, h3, .cycle-month { font-family: 'Trirong', Georgia, 'Times New Roman', s
 .opts.saving .opt[aria-pressed="true"] { border-style: dashed; }
 .opts.saved .opt[aria-pressed="true"] { border-color: #3b8454; background: #e8f1e6; }
 
-.vcard-foot { margin-top: 16px; text-align: right; }
+.vcard-foot { margin-top: 16px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px; }
+.away-btn { display: inline-flex; align-items: center; gap: 6px; color: #6b6255; }
+.away-btn .ic { width: 16px; height: 16px; }
+.notes-input {
+    width: 100%; box-sizing: border-box; padding: 10px 12px; font: inherit; font-size: 16px; line-height: 1.4;
+    border: 2px solid #dbd4c6; border-radius: 12px; background: #fff; color: inherit; resize: vertical; outline: none;
+}
+.notes-input:focus { border-color: #cf4520; box-shadow: 0 0 0 3px rgba(207, 69, 32, 0.15); }
+.notes-hint { min-height: 18px; margin-top: 4px; font-size: 13px; color: #8a8173; }
+.notes-hint.ok { color: #3b8454; }
+.notes-hint.err { color: #a8231a; }
 
 /* ---------- Add volunteers ---------- */
 .add-wrap { padding: 8px 20px 20px; }

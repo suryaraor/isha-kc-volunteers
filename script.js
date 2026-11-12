@@ -234,12 +234,21 @@ function volunteerCard(v) {
         body.appendChild(block);
     });
 
+    body.appendChild(notesBlock(v));
+
     const foot = el('div', 'vcard-foot');
-    const rm = el('button', 'link-btn danger', 'Remove from my list');
-    rm.addEventListener('click', () => {
-        if (confirmRemove(rm)) releaseOne(v, rm);
+    const away = el('button', 'link-btn away-btn');
+    away.type = 'button';
+    away.append(icon('plane'), el('span', '', 'Moved out of town'));
+    away.addEventListener('click', () => {
+        if (confirmTwice(away, 'Tap again: stop tracking them')) markOutOfTown(v, away);
     });
-    foot.appendChild(rm);
+    const rm = el('button', 'link-btn danger', 'Remove from my list');
+    rm.type = 'button';
+    rm.addEventListener('click', () => {
+        if (confirmTwice(rm, 'Tap again to remove')) releaseOne(v, rm);
+    });
+    foot.append(away, rm);
     body.appendChild(foot);
     card.appendChild(body);
 
@@ -258,16 +267,66 @@ function volunteerCard(v) {
     return card;
 }
 
-// Two-tap remove (no browser confirm dialog): first tap arms, second tap within 4s removes
-function confirmRemove(btn) {
+// Two-tap confirm (no browser confirm dialog): first tap arms, second tap within 4s acts
+function confirmTwice(btn, armedText) {
     if (btn.dataset.armed) return true;
     btn.dataset.armed = '1';
-    btn.textContent = 'Tap again to remove';
+    const original = [...btn.childNodes];
+    btn.replaceChildren(armedText);
     setTimeout(() => {
         delete btn.dataset.armed;
-        btn.textContent = 'Remove from my list';
+        btn.replaceChildren(...original);
     }, 4000);
     return false;
+}
+
+// Free-form feedback for this month. Saves when the person pauses typing or leaves the box.
+function notesBlock(v) {
+    const block = el('div', 'q');
+    const id = `notes-${v.id}`;
+    const title = el('label', 'q-title');
+    title.htmlFor = id;
+    title.append(icon('message-square'), el('span', '', 'Anything else to share?'));
+    const box = el('textarea', 'notes-input');
+    box.id = id;
+    box.rows = 3;
+    box.maxLength = 1000;
+    box.placeholder = 'Optional: how the conversation went, anything they need, or other feedback';
+    box.value = v.status.notes || '';
+    const hint = el('div', 'notes-hint');
+    block.append(title, box, hint);
+
+    let timer;
+    let saved = box.value;
+    const save = async () => {
+        clearTimeout(timer);
+        const value = box.value.trim();
+        if (value === saved) return;
+        hint.textContent = 'Saving...';
+        hint.className = 'notes-hint';
+        try {
+            await api({
+                action: 'setStatus', activeId: state.me.id, id: v.id,
+                month: CYCLE.key, satsang: CYCLE.targetYmd, field: 'notes', value
+            });
+            saved = value;
+            v.status.notes = value;
+            if (box.value.trim() === value) {
+                hint.textContent = 'Saved';
+                hint.className = 'notes-hint ok';
+            }
+        } catch (err) {
+            hint.textContent = `Not saved: ${err.message}`;
+            hint.className = 'notes-hint err';
+        }
+    };
+    box.addEventListener('input', () => {
+        clearTimeout(timer);
+        hint.textContent = '';
+        timer = setTimeout(save, 1500);
+    });
+    box.addEventListener('blur', save);
+    return block;
 }
 
 // Update the UI instantly, then sync; a later tap simply overwrites this month's answer
@@ -368,6 +427,21 @@ async function assignSelected() {
     } catch (err) {
         showError(err.message);
         updateAssignBtn();
+    }
+}
+
+async function markOutOfTown(v, btn) {
+    btn.disabled = true;
+    try {
+        await api({ action: 'outOfTown', activeId: state.me.id, id: v.id });
+        showToast(`${v.name} is marked out of town and won't be tracked anymore.`);
+        state.open.delete(v.id);
+        await Promise.all([loadData(), loadMine()]);
+        renderMine();
+        renderAvailable();
+    } catch (err) {
+        showError(err.message);
+        btn.disabled = false;
     }
 }
 
