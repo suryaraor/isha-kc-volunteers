@@ -7,8 +7,9 @@ const mstate = {
     busy: new Set() // item keys with a save in flight
 };
 
-// The next 12 Satsangs, starting with this cycle's: { key: '2026-11', date, short: 'Nov 14', label: "Nov '26" }
-const MONTHS_AHEAD = 12;
+// Upcoming Satsangs from this cycle's through December of next year (at least 12 months),
+// e.g. Nov '26 to Dec '27: { key: '2026-11', date, month: 'Nov', year: '26', day: 14 }
+const MONTHS_AHEAD = 12 + (11 - (CYCLE.target.getMonth() + 11) % 12);
 const UPCOMING = Array.from({ length: MONTHS_AHEAD }, (_, i) => {
     const date = secondSaturday(CYCLE.target.getFullYear(), CYCLE.target.getMonth() + i);
     return {
@@ -46,7 +47,7 @@ async function init() {
     $('sheetClose').addEventListener('click', closeSheet);
     $('sheetBackdrop').addEventListener('click', closeSheet);
     $('pickThis').addEventListener('click', () => setPicked([CYCLE.key]));
-    $('pickYear').addEventListener('click', () => setPicked(UPCOMING.map((u) => u.key)));
+    $('pickYear').addEventListener('click', () => setPicked(UPCOMING.slice(0, 12).map((u) => u.key)));
     $('pickNone').addEventListener('click', () => setPicked([]));
     $('sheetSave').addEventListener('click', saveSheet);
     document.addEventListener('keydown', (e) => {
@@ -317,9 +318,10 @@ function renderSheet() {
     });
 
     const open = UPCOMING.filter((u) => isMine(m.key, u.key) || takenBy(m.key, u.key).length < m.slots).map((u) => u.key);
-    const all = open.length > 0 && open.every((k) => sheet.picked.has(k));
+    const yearOpen = open.filter((k) => UPCOMING.slice(0, 12).some((u) => u.key === k));
+    const all = yearOpen.length > 0 && yearOpen.every((k) => sheet.picked.has(k)) && sheet.picked.size === yearOpen.length;
     $('pickThis').classList.toggle('on', sheet.picked.size === 1 && sheet.picked.has(CYCLE.key));
-    $('pickYear').classList.toggle('on', all && open.length > 1);
+    $('pickYear').classList.toggle('on', all && yearOpen.length > 1);
     $('pickThis').disabled = !open.includes(CYCLE.key);
 
     const { add, remove } = sheetDiff();
